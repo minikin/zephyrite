@@ -1,0 +1,80 @@
+{
+  "Async function": {
+    "prefix": "afn",
+    "body": [
+      "async fn ${1:function_name}(${2:params}) -> ${3:Result<(), anyhow::Error>} {",
+      "\t${4:// TODO: implement}",
+      "\tOk(())",
+      "}"
+    ],
+    "description": "Async function template"
+  },
+  "Test function": {
+    "prefix": "test",
+    "body": [
+      "#[tokio::test]",
+      "async fn ${1:test_name}() {",
+      "\t${2:// Arrange}",
+      "\t",
+      "\t${3:// Act}",
+      "\t",
+      "\t${4:// Assert}",
+      "}"
+    ],
+    "description": "Async test function"
+  },
+  "Result match": {
+    "prefix": "match_result",
+    "body": [
+      "match ${1:result} {",
+      "\tOk(${2:value}) => ${3:// handle success},",
+      "\tErr(${4:error}) => ${5:// handle error},",
+      "}"
+    ],
+    "description": "Match on Result"
+  },
+  "Option match": {
+    "prefix": "match_option",
+    "body": [
+      "match ${1:option} {",
+      "\tSome(${2:value}) => ${3:// handle some},",
+      "\tNone => ${4:// handle none},",
+      "}"
+    ],
+    "description": "Match on Option"
+  },
+  "Let else": {
+    "prefix": "let_else",
+    "body": [
+      "let ${1:Some(value)} = ${2:option} else {",
+      "\t${3:return Err(anyhow::anyhow!(\"Expected value\"));}",
+      "};"
+    ],
+    "description": "Let-else pattern (Edition 2024)"
+  },
+  "Tracing info": {
+    "prefix": "info",
+    "body": ["tracing::info!(${1:\"message\"});"],
+    "description": "Tracing info log"
+  },
+  "Tracing debug": {
+    "prefix": "debug",
+    "body": ["tracing::debug!(${1:\"message\"});"],
+    "description": "Tracing debug log"
+  },
+  "Tracing error": {
+    "prefix": "error",
+    "body": ["tracing::error!(${1:\"message\"});"],
+    "description": "Tracing error log"
+  },
+  "Derive macro": {
+    "prefix": "derive",
+    "body": ["#[derive(${1:Debug, Clone, PartialEq, Eq})]"],
+    "description": "Common derive macro"
+  },
+  "Serde derive": {
+    "prefix": "serde",
+    "body": ["#[derive(${1:Debug, Clone, }Serialize, Deserialize)]"],
+    "description": "Serde derive macro"
+  }
+}
