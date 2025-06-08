@@ -39,9 +39,6 @@ just build
 
 We're currently building the foundation of Zephyrite step by step. The basic project structure is set up with:
 
-- ✅ Rust Edition 2024 project structure
-- ✅ Development tooling (justfile, linting)
-- ✅ Professional README and documentation
 - 🚧 **Next**: Basic HTTP server and in-memory storage
 
 ### Coming Soon
@@ -62,12 +59,18 @@ curl -X PUT http://127.0.0.1:8080/keys/hello \
 
 ### Commands
 
+You can run `just default` to see the available commands:
+
 ```bash
-just dev      # Format + lint + test
-just run      # Start the server
-just test     # Run tests
-just fmt      # Format code
-just lint     # Run linting
+Available recipes:
+    build   # Build the project
+    clean   # Clean build artifacts
+    default # Default recipe - shows available commands
+    dev     # Development workflow (format + lint + test)
+    fmt     # Format code
+    lint    # Run linting
+    run     # Run the server
+    test    # Run tests
 ```
 
 ### API Endpoints (Planned)
@@ -144,9 +147,9 @@ zephyrite/
 │       └── error.rs      # Error types (Phase 1)
 ├── tests/                # Integration tests (Phase 1)
 ├── examples/             # Usage examples (Phase 1)
-├── Cargo.toml           # Dependencies ✅
-├── justfile             # Task commands ✅
-└── README.md           # This file ✅
+├── Cargo.toml           # Dependencies
+├── justfile             # Task commands
+└── README.md           # This file
 ```
 
 ✅ = Complete | 🚧 = In development
@@ -167,9 +170,8 @@ cargo run -- --log-level debug
 
 ### Phase 1: Foundation 🚧 **In Progress**
 
-- [x] Project setup with Rust Edition 2024
-- [x] Development tooling (justfile, linting)
-- [x] Professional documentation
+- [x] Project setup
+- [x] Development tooling (justfile, linting. conventional commits, etc.)
 - [ ] **Next**: Basic HTTP server
 - [ ] **Next**: In-memory key-value storage
 - [ ] **Next**: REST API (GET, PUT, DELETE, LIST)
