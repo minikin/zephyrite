@@ -24,6 +24,7 @@ It combines the performance of in-memory operations with the durability of persi
     - [Phase 2: Persistence (Planned)](#phase-2-persistence-planned)
     - [Phase 3: Distribution (Planned)](#phase-3-distribution-planned)
     - [Phase 4: Advanced Features (Planned)](#phase-4-advanced-features-planned)
+  - [📚 Documentation](#-documentation)
   - [🤝 Contributing](#-contributing)
   - [📄 License](#-license)
   - [🙋 Support](#-support)
@@ -42,6 +43,7 @@ It combines the performance of in-memory operations with the durability of persi
 
 - **Rust 1.85+** (Edition 2024 support)
 - **Just** (task runner) - `cargo install just`
+- **Node.js** (optional) - For automated commit tools and validation
 
 ### Installation
 
@@ -62,6 +64,8 @@ just build
 
 We're currently building the foundation of Zephyrite step by step. The basic project structure is set up with:
 
+- ✅ Rust Edition 2024 project structure
+- ✅ Development tooling (justfile, linting)
 - 🚧 **Next**: Basic HTTP server and in-memory storage
 
 ### Coming Soon
@@ -82,18 +86,12 @@ curl -X PUT http://127.0.0.1:8080/keys/hello \
 
 ### Commands
 
-You can run `just default` to see the available commands:
-
 ```bash
-Available recipes:
-    build   # Build the project
-    clean   # Clean build artifacts
-    default # Default recipe - shows available commands
-    dev     # Development workflow (format + lint + test)
-    fmt     # Format code
-    lint    # Run linting
-    run     # Run the server
-    test    # Run tests
+just dev      # Format + lint + test
+just run      # Start the server
+just test     # Run tests
+just fmt      # Format code
+just lint     # Run linting
 ```
 
 ### API Endpoints (Planned)
@@ -170,9 +168,9 @@ zephyrite/
 │       └── error.rs      # Error types (Phase 1)
 ├── tests/                # Integration tests (Phase 1)
 ├── examples/             # Usage examples (Phase 1)
-├── Cargo.toml           # Dependencies
-├── justfile             # Task commands
-└── README.md           # This file
+├── Cargo.toml           # Dependencies ✅
+├── justfile             # Task commands ✅
+└── README.md           # This file ✅
 ```
 
 ✅ = Complete | 🚧 = In development
@@ -219,14 +217,23 @@ cargo run -- --log-level debug
 - [ ] Transactions
 - [ ] Performance optimizations
 
+## 📚 Documentation
+
+- [Conventional Commits Setup](docs/CONVENTIONAL_COMMITS.md) - Detailed commit message guide
+- API Documentation (coming in Phase 1)
+- Development Guide (coming soon)
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our development setup:
 
 1. **Install prerequisites**: Rust 1.85+, Just
-2. **Clone and build**: `git clone ... && just build`
-3. **Run tests**: `just test`
-4. **Follow our workflow**: `just dev` before committing
+2. **Optional**: Install Node.js for enhanced commit tools
+3. **Clone and build**: `git clone ... && just build`
+4. **Setup conventional commits**: `just setup-git`
+5. **Run tests**: `just test`
+6. **Follow our workflow**: `just dev` before committing
+7. **Use conventional commits**: See `just commit-examples` for format
 
 ## 📄 License
 
