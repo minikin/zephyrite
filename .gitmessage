@@ -1,0 +1,25 @@
+# .gitmessage - Git commit message template
+# <type>[optional scope]: <description>
+#
+# [optional body]
+#
+# [optional footer(s)]
+#
+# Types for Zephyrite:
+# feat:     A new feature
+# fix:      A bug fix
+# docs:     Documentation only changes
+# style:    Changes that do not affect the meaning of the code
+# refactor: A code change that neither fixes a bug nor adds a feature
+# test:     Adding missing tests or correcting existing tests
+# chore:    Other changes that don't modify src or test files
+#
+# Scope examples:
+# storage, server, config, api, cli, docs
+#
+# Examples:
+# feat(server): add HTTP GET endpoint
+# fix(storage): handle empty key validation
+# docs(readme): update installation instructions
+# test(storage): add memory storage tests
+# chore(deps): update tokio to 1.41
