@@ -1,10 +1,11 @@
+// .vscode/snippets/rust.json - Correct location and format
 {
   "Async function": {
     "prefix": "afn",
     "body": [
-      "async fn ${1:function_name}(${2:params}) -> ${3:Result<(), anyhow::Error>} {",
-      "\t${4:// TODO: implement}",
-      "\tOk(())",
+      "async fn ${1:function_name}(${2:params}) -> Result<${3:()}, ${4:ServerError}> {",
+      "\t${5:// TODO: implement}",
+      "\tOk(${6:()})",
       "}"
     ],
     "description": "Async function template"
@@ -15,7 +16,7 @@
       "#[tokio::test]",
       "async fn ${1:test_name}() {",
       "\t${2:// Arrange}",
-      "\t",
+      "\t$0",
       "\t${3:// Act}",
       "\t",
       "\t${4:// Assert}",
@@ -47,7 +48,7 @@
     "prefix": "let_else",
     "body": [
       "let ${1:Some(value)} = ${2:option} else {",
-      "\t${3:return Err(anyhow::anyhow!(\"Expected value\"));}",
+      "\t${3:return Err(${4:ServerError::StartupError { message: \"Expected value\".to_string() }});}",
       "};"
     ],
     "description": "Let-else pattern (Edition 2024)"
@@ -76,5 +77,51 @@
     "prefix": "serde",
     "body": ["#[derive(${1:Debug, Clone, }Serialize, Deserialize)]"],
     "description": "Serde derive macro"
+  },
+  "Thiserror enum": {
+    "prefix": "error_enum",
+    "body": [
+      "#[derive(Debug, Error)]",
+      "pub enum ${1:MyError} {",
+      "\t#[error(\"${2:Error message}: {0}\")]",
+      "\t${3:ErrorVariant}(#[from] ${4:std::io::Error}),",
+      "\t",
+      "\t#[error(\"${5:Custom error}: {message}\")]",
+      "\t${6:CustomError} { message: String },",
+      "}"
+    ],
+    "description": "Thiserror enum template"
+  },
+  "HTTP handler": {
+    "prefix": "handler",
+    "body": [
+      "async fn ${1:handler_name}(",
+      "\t${2:// Add extractors here}",
+      ") -> Result<${3:Json<Response>}, ${4:StatusCode}> {",
+      "\t${5:// TODO: implement}",
+      "\tOk(${6:Json(response)})",
+      "}"
+    ],
+    "description": "Axum HTTP handler template"
+  },
+  "Server struct": {
+    "prefix": "server",
+    "body": [
+      "pub struct ${1:Server} {",
+      "\tconfig: ${2:Config},",
+      "}",
+      "",
+      "impl ${1:Server} {",
+      "\tpub fn new(config: ${2:Config}) -> Self {",
+      "\t\tSelf { config }",
+      "\t}",
+      "\t",
+      "\tpub async fn start(self) -> Result<()> {",
+      "\t\t${3:// TODO: implement}",
+      "\t\tOk(())",
+      "\t}",
+      "}"
+    ],
+    "description": "Server struct template"
   }
 }
