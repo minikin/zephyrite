@@ -5,6 +5,29 @@
 Zephyrite is a modern key-value database designed for speed, reliability, and scalability.
 It combines the performance of in-memory operations with the durability of persistent storage.
 
+- [Zephyrite](#zephyrite)
+  - [✨ Planned Features](#-planned-features)
+  - [🚀 Quick Start](#-quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Current Status](#current-status)
+    - [Coming Soon](#coming-soon)
+  - [🛠️ Development](#️-development)
+    - [Commands](#commands)
+    - [API Endpoints (Planned)](#api-endpoints-planned)
+    - [Request/Response Format (Planned)](#requestresponse-format-planned)
+  - [🧪 Testing](#-testing)
+  - [📚 Project Structure](#-project-structure)
+  - [🔧 Configuration](#-configuration)
+  - [🗺️ Development Roadmap](#️-development-roadmap)
+    - [Phase 1: Foundation 🚧 **In Progress**](#phase-1-foundation--in-progress)
+    - [Phase 2: Persistence (Planned)](#phase-2-persistence-planned)
+    - [Phase 3: Distribution (Planned)](#phase-3-distribution-planned)
+    - [Phase 4: Advanced Features (Planned)](#phase-4-advanced-features-planned)
+  - [🤝 Contributing](#-contributing)
+  - [📄 License](#-license)
+  - [🙋 Support](#-support)
+
 ## ✨ Planned Features
 
 - **Fast In-Memory Storage**: High-performance key-value operations
@@ -213,5 +236,3 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/zephyrite/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/zephyrite/discussions)
-
-**Zephyrite**: Fast, reliable, and built with Rust 🦀
