@@ -168,9 +168,9 @@ zephyrite/
 │       └── error.rs      # Error types (Phase 1)
 ├── tests/                # Integration tests (Phase 1)
 ├── examples/             # Usage examples (Phase 1)
-├── Cargo.toml           # Dependencies ✅
-├── justfile             # Task commands ✅
-└── README.md           # This file ✅
+├── Cargo.toml           # Dependencies
+├── justfile             # Task commands
+└── README.md           # This file
 ```
 
 ✅ = Complete | 🚧 = In development
@@ -193,7 +193,7 @@ cargo run -- --log-level debug
 
 - [x] Project setup
 - [x] Development tooling (justfile, linting. conventional commits, etc.)
-- [ ] **Next**: Basic HTTP server
+- [x] **Next**: Basic HTTP server
 - [ ] **Next**: In-memory key-value storage
 - [ ] **Next**: REST API (GET, PUT, DELETE, LIST)
 - [ ] **Next**: Comprehensive testing
