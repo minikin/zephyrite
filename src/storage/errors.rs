@@ -26,3 +26,6 @@ pub enum StorageError {
     #[error("Unsupported operation: {0}")]
     UnsupportedOperation,
 }
+
+/// Result type for storage operations
+pub type StorageResult<T> = Result<T, StorageError>;
