@@ -3,7 +3,7 @@ use super::error::{StorageError, StorageResult};
 pub fn validate_key(key: &str) -> StorageResult<()> {
     /// Helper functions for key validation
     pub fn validate_key(key: &str) -> StorageResult<()> {
-        // 1. Basic checks
+        // Basic checks
         if key.is_empty() {
             return Err(StorageError::InvalidKey("Key cannot be empty".to_string()));
         }
@@ -14,7 +14,7 @@ pub fn validate_key(key: &str) -> StorageResult<()> {
             ));
         }
 
-        // 2. Whitespace checks
+        // Whitespace checks
         if key.starts_with(' ') || key.ends_with(' ') {
             return Err(StorageError::InvalidKey(
                 "Key cannot start or end with spaces".to_string(),
@@ -27,7 +27,7 @@ pub fn validate_key(key: &str) -> StorageResult<()> {
             ));
         }
 
-        // 3. Dangerous characters
+        // Dangerous characters
         if key.contains('\0') {
             return Err(StorageError::InvalidKey(
                 "Key cannot contain null bytes".to_string(),
@@ -40,28 +40,28 @@ pub fn validate_key(key: &str) -> StorageResult<()> {
             ));
         }
 
-        // 4. Control characters (ASCII 0-31, 127)
+        // Control characters (ASCII 0-31, 127)
         if key.chars().any(|c| c.is_ascii_control()) {
             return Err(StorageError::InvalidKey(
                 "Key cannot contain control characters".to_string(),
             ));
         }
 
-        // 5. Reserved patterns for internal use
+        // Reserved patterns for internal use
         if key.starts_with("__zephyrite_") {
             return Err(StorageError::InvalidKey(
                 "Keys cannot start with '__zephyrite_' (reserved prefix)".to_string(),
             ));
         }
 
-        // 6. Path traversal prevention
+        // Path traversal prevention
         if key.contains("..") {
             return Err(StorageError::InvalidKey(
                 "Key cannot contain '..' (security risk)".to_string(),
             ));
         }
 
-        // 7. Some systems have issues with these
+        // Some systems have issues with these
         if key.contains('\x7F') {
             return Err(StorageError::InvalidKey(
                 "Key cannot contain DEL character".to_string(),
