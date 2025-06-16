@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 /// Returns the current timestamp in ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
 pub fn current_timestamp() -> String {

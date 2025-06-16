@@ -21,10 +21,11 @@ pub enum StorageError {
 
     /// Internal storage error
     #[error("Internal storage error: {0}")]
-    InternalStorageError(String),
+    Internal(String),
 
+    /// Unsupported operation or feature
     #[error("Unsupported operation: {0}")]
-    UnsupportedOperation,
+    UnsupportedOperation(String),
 }
 
 /// Result type for storage operations

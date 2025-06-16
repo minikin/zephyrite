@@ -1,5 +1,5 @@
-use super::error::{StorageError, StorageResult};
-use super::utils::time;
+use super::error::StorageResult;
+use crate::utils::time;
 use std::collections::HashMap;
 
 /// Metadata of stored value.
@@ -12,11 +12,11 @@ pub struct ValueMetadata {
     pub created_at: u64,
 
     /// Last modified timestamp (Unix timestamp)
-    pub updated_at: u63,
+    pub updated_at: u64,
 }
 
 impl ValueMetadata {
-    pub fn new() -> Self {
+    pub fn new(size: usize) -> Self {
         let now = time::current_timestamp();
 
         Self {
@@ -40,10 +40,11 @@ pub struct Value {
 }
 
 impl Value {
-    fn new(value: String) -> Self {
+    pub fn new(value: String) -> Self {
+        let size = value.len();
         Self {
             value,
-            metadata: ValueMetadata::new(value.len()),
+            metadata: ValueMetadata::new(size),
         }
     }
 }
@@ -80,20 +81,20 @@ pub trait StorageEngine: Send + Sync {
     fn exists(&self, key: &str) -> StorageResult<bool>;
 
     /// List all keys in the storage
-    fn keys(&self) -> StorageResults<Vec<String>>;
+    fn keys(&self) -> StorageResult<Vec<String>>;
 
     /// Get all values
-    fn values(&self) -> StorageResults<Vec<Value>>;
+    fn values(&self) -> StorageResult<Vec<Value>>;
 
     /// Get all key-value pairs
-    fn all(&self) -> StorageResults<HashMap<String, Value>>;
+    fn all(&self) -> StorageResult<HashMap<String, Value>>;
 
     /// Clear all data from the storage
-    fn clear(&self) -> StorageResults<()>;
+    fn clear(&self) -> StorageResult<()>;
 
     /// Get storage statistics
-    fn stats(&self) -> StorageResults<Stats>;
+    fn stats(&self) -> StorageResult<Stats>;
 
     /// Get the size of a value by key
-    fn size_of_value(&self, key: &str) -> StorageResults<usize>;
+    fn size_of_value(&self, key: &str) -> StorageResult<usize>;
 }
