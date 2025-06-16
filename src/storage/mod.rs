@@ -20,7 +20,7 @@
 //! assert_eq!(stored_value.value, "world");
 //!
 //! // List all keys
-//! let keys = storage.list_keys().unwrap();
+//! let keys = storage.keys().unwrap();
 //! assert_eq!(keys.len(), 1);
 //! ```
 
