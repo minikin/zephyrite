@@ -8,6 +8,7 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub mod configs;
 pub mod server;
 pub mod storage;
+/// Utility functions and helpers
 pub mod utils;
 
 pub use configs::Config;

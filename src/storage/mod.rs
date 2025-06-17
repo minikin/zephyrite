@@ -24,9 +24,13 @@
 //! assert_eq!(keys.len(), 1);
 //! ```
 
+/// Storage engine trait and core types
 pub mod engine;
+/// Error types for storage operations
 pub mod error;
+/// In-memory storage implementation
 pub mod memory;
+/// Utility functions for storage operations
 pub mod utils;
 
 // Re-export commonly used types for convenience
@@ -36,16 +40,18 @@ pub use memory::MemoryStorage;
 
 /// Create a new default storage engine
 ///
-/// Currently returns a MemoryStorage instance, but this can be extended
+/// Currently returns a `MemoryStorage` instance, but this can be extended
 /// to support configuration-based storage engine selection in the future.
+#[must_use]
 pub fn storage() -> Box<dyn StorageEngine> {
     Box::new(MemoryStorage::new())
 }
 
 /// Create a storage engine with the specified capacity
 ///
-/// For memory storage, this pre-allocates the internal HashMap capacity.
+/// For memory storage, this pre-allocates the internal `HashMap` capacity.
 /// For future disk-based storage, this might set cache sizes or other parameters.
+#[must_use]
 pub fn storage_with_capacity(capacity: usize) -> Box<dyn StorageEngine> {
     Box::new(MemoryStorage::with_capacity(capacity))
 }

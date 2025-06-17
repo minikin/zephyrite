@@ -1,6 +1,9 @@
 use super::error::{StorageError, StorageResult};
 
 /// Helper functions for key validation
+///
+/// # Errors
+/// Returns `StorageError::InvalidKey` if the key is invalid (empty, too long, contains forbidden characters, etc.)
 pub fn validate_key(key: &str) -> StorageResult<()> {
     // Basic checks
     if key.is_empty() {
@@ -71,6 +74,9 @@ pub fn validate_key(key: &str) -> StorageResult<()> {
 }
 
 /// Validate key with configurable strictness
+///
+/// # Errors
+/// Returns `StorageError::InvalidKey` if the key fails standard validation or additional strict checks
 pub fn validate_key_strict(key: &str, allow_slashes: bool, allow_dots: bool) -> StorageResult<()> {
     // First run standard validation
     validate_key(key)?;
@@ -99,6 +105,9 @@ pub fn validate_key_strict(key: &str, allow_slashes: bool, allow_dots: bool) -> 
 }
 
 /// Helper functions for value validation
+///
+/// # Errors
+/// Returns `StorageError::InvalidValue` if the value is too large (exceeds 1MB limit)
 pub fn validate_value(value: &str) -> StorageResult<()> {
     // For now, we'll allow any UTF-8 string as a value
     // In the future, we might add size limits or other constraints

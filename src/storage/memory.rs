@@ -19,6 +19,7 @@ pub struct MemoryStorage {
 
 impl MemoryStorage {
     /// Create a new in-memory storage
+    #[must_use]
     pub fn new() -> Self {
         Self {
             data: Arc::new(RwLock::new(HashMap::new())),
@@ -29,6 +30,7 @@ impl MemoryStorage {
     }
 
     /// Create a new in-memory storage with initial capacity
+    #[must_use]
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
             data: Arc::new(RwLock::new(HashMap::with_capacity(capacity))),
@@ -39,7 +41,8 @@ impl MemoryStorage {
     }
 
     /// Calculate memory usage of the current data
-    fn calculate_memory_usage(&self, data: &HashMap<String, Value>) -> usize {
+    #[must_use]
+    pub fn calculate_memory_usage(data: &HashMap<String, Value>) -> usize {
         data.iter()
             .map(|(key, value)| key.len() + value.value.len() + std::mem::size_of::<Value>())
             .sum()
@@ -146,7 +149,7 @@ impl StorageEngine for MemoryStorage {
 
         Ok(Stats {
             key_count: data.len(),
-            memory_usage: self.calculate_memory_usage(&data),
+            memory_usage: Self::calculate_memory_usage(&data),
             get_operations_count: self.get_ops.load(Ordering::Relaxed),
             put_operations_count: self.put_ops.load(Ordering::Relaxed),
             delete_operations_count: self.delete_ops.load(Ordering::Relaxed),
