@@ -33,7 +33,6 @@ pub mod memory;
 /// Utility functions for storage operations
 pub mod utils;
 
-// Re-export commonly used types for convenience
 pub use engine::{Stats, StorageEngine, Value, ValueMetadata};
 pub use error::{StorageError, StorageResult};
 pub use memory::MemoryStorage;
