@@ -25,28 +25,32 @@ pub enum ServerError {
     /// Server startup error
     #[error("Server failed to start: {0}")]
     StartupError(String),
+
+    /// Storage error
+    #[error("Storage error: {0}")]
+    StorageError(#[from] StorageError),
 }
 
 /// Result type for server operations
 pub type Result<T> = std::result::Result<T, ServerError>;
 
-/// HTTP Server
+/// HTTP Server with integrated storage
 pub struct Server {
     config: Config,
     storage: Arc<dyn StorageEngine>,
 }
 
 impl Server {
+    /// Creates a new server instance with the given configuration and default storage.
+    #[must_use]
+    pub fn new(config: Config) -> Self {
+        Self::with_storage(config, Arc::new(MemoryStorage::new()))
+    }
+
     /// Creates a new server instance with the given configuration and custom storage.
     #[must_use]
     pub fn with_storage(config: Config, storage: Arc<dyn StorageEngine>) -> Self {
         Self { config, storage }
-    }
-
-    /// Creates a new server instance with the given configuration.
-    #[must_use]
-    pub fn new(config: Config) -> Self {
-        Self::with_storage(config, Arc::new(MemoryStorage::new()))
     }
 
     /// Start the server and listen for incoming requests.
@@ -72,9 +76,7 @@ impl Server {
     where
         F: std::future::Future<Output = ()> + Send + 'static,
     {
-        let app = Router::new()
-            .route("/", get(health_check))
-            .route("/health", get(health_check));
+        let app = self.create_router();
 
         info!("🌟 Starting Zephyrite server on {}", self.config.address);
 
@@ -119,7 +121,7 @@ impl Server {
         Router::new()
             .route("/", get(health_check))
             .route("/health", get(health_check))
-            .route("/keys", get(keys))
+            .route("/keys", get(list_keys))
             .route("/keys/:key", get(get_key))
             .route("/keys/:key", put(put_key))
             .route("/keys/:key", delete(delete_key))
@@ -127,67 +129,64 @@ impl Server {
     }
 }
 
-/// Health check res
-#[derive(Serialize, Deserialize)]
-pub struct HealthResponse {
-    status: String,
-    version: String,
-    service: String,
-}
+// Request/Response types
+
 /// Request body for storing a value
 #[derive(Deserialize)]
 pub struct PutKeyRequest {
-    /// The value to be stored
+    /// The value to store
     pub value: String,
+}
+
+/// Response for health check endpoint
+#[derive(Serialize)]
+pub struct HealthResponse {
+    /// Status of the service
+    pub status: String,
+    /// Version of the service
+    pub version: String,
+    /// Name of the service
+    pub service: String,
 }
 
 /// Response for getting a key
 #[derive(Serialize)]
 pub struct GetKeyResponse {
-    /// The key that was retrieved
+    /// The key that was requested
     pub key: String,
     /// The value associated with the key
     pub value: String,
     /// Whether the key was found
     pub found: bool,
-    /// The size of the value in bytes
+    /// Size of the value in bytes
     pub size: usize,
-    /// The creation timestamp of the value
-    /// in ISO 8601 format
-    /// e.g. "2023-10-01T12:00:00Z"
-    /// or "2023-10-01T12:00:00+00:00"
-    /// depending on the timezone
+    /// Creation timestamp of the key
     pub created_at: String,
-    /// The last updated timestamp of the value
-    /// in ISO 8601 format
-    /// e.g. "2023-10-01T12:00:00Z"
-    /// or "2023-10-01T12:00:00+00:00"
-    /// depending on the timezone
+    /// Last updated timestamp of the key
     pub updated_at: String,
 }
+
 /// Response for listing keys
 #[derive(Serialize)]
 pub struct ListKeysResponse {
-    /// List of keys in the storage
-    /// This is a simple list of keys, not key-value pairs.
+    /// List of keys stored in the system
     pub keys: Vec<String>,
-    /// The number of keys in the storage
-    /// This is the count of keys, not key-value pairs.
+    /// Count of keys stored
     pub count: usize,
 }
+
 /// Error response
 #[derive(Serialize)]
 pub struct ErrorResponse {
     /// Error code indicating the type of error
-    /// e.g. `key_not_found`, `invalid_key`, etc.
-    /// This is a machine-readable error code.
-    /// It should be used for programmatic error handling.
-    /// It is not intended for end-user display.
     pub error: String,
     /// Human-readable error message
-    /// This is a user-friendly message that can be displayed to the end user.
+    /// This message provides more context about the error
+    /// and can be used for debugging or user feedback.
     pub message: String,
 }
+
+// Handler functions
 
 /// Health check endpoint
 async fn health_check() -> Json<HealthResponse> {
@@ -314,7 +313,7 @@ async fn delete_key(
 }
 
 /// GET /keys - List all keys
-async fn keys(
+async fn list_keys(
     State(storage): State<Arc<dyn StorageEngine>>,
 ) -> std::result::Result<Json<ListKeysResponse>, (StatusCode, Json<ErrorResponse>)> {
     match storage.keys() {
