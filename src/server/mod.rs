@@ -122,14 +122,12 @@ impl Server {
             .route("/", get(health_check))
             .route("/health", get(health_check))
             .route("/keys", get(list_keys))
-            .route("/keys/:key", get(get_key))
-            .route("/keys/:key", put(put_key))
-            .route("/keys/:key", delete(delete_key))
+            .route("/keys/{key}", get(get_key))
+            .route("/keys/{key}", put(put_key))
+            .route("/keys/{key}", delete(delete_key))
             .with_state(Arc::clone(&self.storage))
     }
 }
-
-// Request/Response types
 
 /// Request body for storing a value
 #[derive(Deserialize)]
@@ -185,8 +183,6 @@ pub struct ErrorResponse {
     /// and can be used for debugging or user feedback.
     pub message: String,
 }
-
-// Handler functions
 
 /// Health check endpoint
 async fn health_check() -> Json<HealthResponse> {

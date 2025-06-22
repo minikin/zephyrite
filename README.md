@@ -17,7 +17,6 @@ It combines the performance of in-memory operations with the durability of persi
     - [API Endpoints (Planned)](#api-endpoints-planned)
     - [Request/Response Format (Planned)](#requestresponse-format-planned)
   - [🧪 Testing](#-testing)
-  - [📚 Project Structure](#-project-structure)
   - [🔧 Configuration](#-configuration)
   - [🗺️ Development Roadmap](#️-development-roadmap)
     - [Phase 1: Foundation 🚧 **In Progress**](#phase-1-foundation--in-progress)
@@ -66,7 +65,7 @@ We're currently building the foundation of Zephyrite step by step. The basic pro
 
 - ✅ Rust Edition 2024 project structure
 - ✅ Development tooling (justfile, linting)
-- 🚧 **Next**: Basic HTTP server and in-memory storage
+- ✅ : Basic HTTP server and in-memory storage
 
 ### Coming Soon
 
@@ -96,13 +95,13 @@ just lint     # Run linting
 
 ### API Endpoints (Planned)
 
-| Method   | Endpoint      | Description            | Status     |
-| -------- | ------------- | ---------------------- | ---------- |
-| `GET`    | `/`           | Health check           | 🚧 Phase 1 |
-| `PUT`    | `/keys/{key}` | Store a key-value pair | 🚧 Phase 1 |
-| `GET`    | `/keys/{key}` | Retrieve a value       | 🚧 Phase 1 |
-| `DELETE` | `/keys/{key}` | Delete a key           | 🚧 Phase 1 |
-| `GET`    | `/keys`       | List all keys          | 🚧 Phase 1 |
+| Method   | Endpoint      | Description            | Status |
+| -------- | ------------- | ---------------------- | ------ |
+| `GET`    | `/`           | Health check           | Done   |
+| `PUT`    | `/keys/{key}` | Store a key-value pair | Done   |
+| `GET`    | `/keys/{key}` | Retrieve a value       | Done   |
+| `DELETE` | `/keys/{key}` | Delete a key           | Done   |
+| `GET`    | `/keys`       | List all keys          | Done   |
 
 ### Request/Response Format (Planned)
 
@@ -119,7 +118,7 @@ Content-Type: application/json
 
 **Response:**
 
-```
+```bash
 201 Created
 ```
 
@@ -150,30 +149,6 @@ just test
 # Coming in Phase 1: Integration tests
 # just test && curl http://127.0.0.1:8080/
 ```
-
-## 📚 Project Structure
-
-```
-zephyrite/
-├── src/
-│   ├── main.rs           # CLI entry point (Phase 1)
-│   ├── lib.rs            # Library root (Phase 1)
-│   ├── config.rs         # Configuration (Phase 1)
-│   ├── server/           # HTTP server (Phase 1)
-│   │   └── mod.rs
-│   └── storage/          # Storage engines (Phase 1)
-│       ├── mod.rs
-│       ├── engine.rs     # Storage trait (Phase 1)
-│       ├── memory.rs     # In-memory impl (Phase 1)
-│       └── error.rs      # Error types (Phase 1)
-├── tests/                # Integration tests (Phase 1)
-├── examples/             # Usage examples (Phase 1)
-├── Cargo.toml           # Dependencies
-├── justfile             # Task commands
-└── README.md           # This file
-```
-
-✅ = Complete | 🚧 = In development
 
 ## 🔧 Configuration
 
