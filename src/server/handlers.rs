@@ -1,3 +1,4 @@
+use crate::storage::utils::{validate_key, validate_value};
 use crate::storage::{StorageEngine, StorageError};
 use axum::{
     extract::{Path, State},
@@ -5,13 +6,53 @@ use axum::{
     response::Json,
 };
 use std::sync::Arc;
-use tracing::error;
+use tracing::{error, info, instrument, warn};
 
 use super::types::{
     ErrorResponse, GetKeyResponse, HealthResponse, ListKeysResponse, PutKeyRequest,
 };
 
+type HandlerResult<T> = std::result::Result<T, (StatusCode, Json<ErrorResponse>)>;
+
+/// Convert storage errors to HTTP responses
+fn handle_storage_error(error: StorageError, operation: &str) -> (StatusCode, Json<ErrorResponse>) {
+    match error {
+        StorageError::KeyNotFound(key) => (
+            StatusCode::NOT_FOUND,
+            Json(ErrorResponse {
+                error: "key_not_found".to_string(),
+                message: format!("Key '{key}' not found"),
+            }),
+        ),
+        StorageError::InvalidKey(msg) => (
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "invalid_key".to_string(),
+                message: msg,
+            }),
+        ),
+        StorageError::InvalidValue(msg) => (
+            StatusCode::BAD_REQUEST,
+            Json(ErrorResponse {
+                error: "invalid_value".to_string(),
+                message: msg,
+            }),
+        ),
+        e => {
+            error!("Storage error in {}: {}", operation, e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ErrorResponse {
+                    error: "internal_error".to_string(),
+                    message: "Internal server error".to_string(),
+                }),
+            )
+        }
+    }
+}
+
 /// Health check endpoint
+#[instrument]
 pub async fn health_check() -> Json<HealthResponse> {
     Json(HealthResponse {
         status: "ok".to_string(),
@@ -21,138 +62,116 @@ pub async fn health_check() -> Json<HealthResponse> {
 }
 
 /// GET /keys/:key - Retrieve a value by key
+#[instrument(skip(storage))]
 pub async fn get_key(
     Path(key): Path<String>,
     State(storage): State<Arc<dyn StorageEngine>>,
-) -> std::result::Result<Json<GetKeyResponse>, (StatusCode, Json<ErrorResponse>)> {
+) -> HandlerResult<Json<GetKeyResponse>> {
+    if let Err(e) = validate_key(&key) {
+        return Err(handle_storage_error(e, "get_key"));
+    }
+
+    info!("Retrieving key: {}", key);
+
     match storage.get(&key) {
-        Ok(stored_value) => Ok(Json(GetKeyResponse {
-            key: key.clone(),
-            value: stored_value.value,
-            found: true,
-            size: stored_value.metadata.size,
-            created_at: stored_value.metadata.created_at,
-            updated_at: stored_value.metadata.updated_at,
-        })),
-        Err(StorageError::KeyNotFound(_)) => Err((
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                error: "key_not_found".to_string(),
-                message: format!("Key '{key}' not found"),
-            }),
-        )),
-        Err(StorageError::InvalidKey(msg)) => Err((
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "invalid_key".to_string(),
-                message: msg,
-            }),
-        )),
-        Err(e) => {
-            error!("Storage error in get_key: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "internal_error".to_string(),
-                    message: "Internal server error".to_string(),
-                }),
+        Ok(stored_value) => {
+            info!(
+                "Successfully retrieved key: {}, size: {} bytes",
+                key, stored_value.metadata.size
+            );
+            Ok(Json(GetKeyResponse {
+                key: key.clone(),
+                value: stored_value.value,
+                found: true,
+                size: stored_value.metadata.size,
+                created_at: stored_value.metadata.created_at,
+                updated_at: stored_value.metadata.updated_at,
+            }))
+        }
+        Err(StorageError::KeyNotFound(_)) => {
+            warn!("Key not found: {}", key);
+            Err(handle_storage_error(
+                StorageError::KeyNotFound(key.clone()),
+                "get_key",
             ))
         }
+        Err(e) => Err(handle_storage_error(e, "get_key")),
     }
 }
 
 /// PUT /keys/:key - Store a key-value pair
+#[instrument(skip(storage, request))]
 pub async fn put_key(
     Path(key): Path<String>,
     State(storage): State<Arc<dyn StorageEngine>>,
     Json(request): Json<PutKeyRequest>,
-) -> std::result::Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+) -> HandlerResult<StatusCode> {
+    if let Err(e) = validate_key(&key) {
+        return Err(handle_storage_error(e, "put_key"));
+    }
+
+    if let Err(e) = validate_value(&request.value) {
+        return Err(handle_storage_error(e, "put_key"));
+    }
+
+    let value_size = request.value.len();
+    info!("Storing key: {}, value size: {} bytes", key, value_size);
+
     match storage.put(&key, &request.value) {
         Ok(was_new) => {
             if was_new {
+                info!("Successfully created new key: {}", key);
                 Ok(StatusCode::CREATED)
             } else {
+                info!("Successfully updated existing key: {}", key);
                 Ok(StatusCode::OK)
             }
         }
-        Err(StorageError::InvalidKey(msg)) => Err((
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "invalid_key".to_string(),
-                message: msg,
-            }),
-        )),
-        Err(StorageError::InvalidValue(msg)) => Err((
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "invalid_value".to_string(),
-                message: msg,
-            }),
-        )),
-        Err(e) => {
-            error!("Storage error in put_key: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "internal_error".to_string(),
-                    message: "Internal server error".to_string(),
-                }),
-            ))
-        }
+        Err(e) => Err(handle_storage_error(e, "put_key")),
     }
 }
 
 /// DELETE /keys/:key - Delete a key
+#[instrument(skip(storage))]
 pub async fn delete_key(
     Path(key): Path<String>,
     State(storage): State<Arc<dyn StorageEngine>>,
-) -> std::result::Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+) -> HandlerResult<StatusCode> {
+    if let Err(e) = validate_key(&key) {
+        return Err(handle_storage_error(e, "delete_key"));
+    }
+
+    info!("Deleting key: {}", key);
+
     match storage.delete(&key) {
         Ok(existed) => {
             if existed {
+                info!("Successfully deleted key: {}", key);
                 Ok(StatusCode::NO_CONTENT)
             } else {
+                warn!("Attempted to delete non-existent key: {}", key);
                 Ok(StatusCode::NOT_FOUND)
             }
         }
-        Err(StorageError::InvalidKey(msg)) => Err((
-            StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                error: "invalid_key".to_string(),
-                message: msg,
-            }),
-        )),
-        Err(e) => {
-            error!("Storage error in delete_key: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "internal_error".to_string(),
-                    message: "Internal server error".to_string(),
-                }),
-            ))
-        }
+        Err(e) => Err(handle_storage_error(e, "delete_key")),
     }
 }
 
 /// GET /keys - List all keys
+#[instrument(skip(storage))]
 pub async fn list_keys(
     State(storage): State<Arc<dyn StorageEngine>>,
-) -> std::result::Result<Json<ListKeysResponse>, (StatusCode, Json<ErrorResponse>)> {
+) -> HandlerResult<Json<ListKeysResponse>> {
+    info!("Listing all keys");
+
     match storage.keys() {
-        Ok(keys) => Ok(Json(ListKeysResponse {
-            count: keys.len(),
-            keys,
-        })),
-        Err(e) => {
-            error!("Storage error in list_keys: {}", e);
-            Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    error: "internal_error".to_string(),
-                    message: "Internal server error".to_string(),
-                }),
-            ))
+        Ok(keys) => {
+            info!("Successfully retrieved {} keys", keys.len());
+            Ok(Json(ListKeysResponse {
+                count: keys.len(),
+                keys,
+            }))
         }
+        Err(e) => Err(handle_storage_error(e, "list_keys")),
     }
 }
