@@ -14,8 +14,31 @@ use super::types::{
 
 type HandlerResult<T> = std::result::Result<T, (StatusCode, Json<ErrorResponse>)>;
 
+/// Represents the different storage operations that can fail
+#[derive(Debug, Clone, Copy)]
+enum Operation {
+    GetKey,
+    PutKey,
+    DeleteKey,
+    ListKeys,
+}
+
+impl std::fmt::Display for Operation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Operation::GetKey => write!(f, "get_key"),
+            Operation::PutKey => write!(f, "put_key"),
+            Operation::DeleteKey => write!(f, "delete_key"),
+            Operation::ListKeys => write!(f, "list_keys"),
+        }
+    }
+}
+
 /// Convert storage errors to HTTP responses
-fn handle_storage_error(error: StorageError, operation: &str) -> (StatusCode, Json<ErrorResponse>) {
+fn handle_storage_error(
+    error: StorageError,
+    operation: Operation,
+) -> (StatusCode, Json<ErrorResponse>) {
     match error {
         StorageError::KeyNotFound(key) => (
             StatusCode::NOT_FOUND,
@@ -68,7 +91,7 @@ pub async fn get_key(
     State(storage): State<Arc<dyn StorageEngine>>,
 ) -> HandlerResult<Json<GetKeyResponse>> {
     if let Err(e) = validate_key(&key) {
-        return Err(handle_storage_error(e, "get_key"));
+        return Err(handle_storage_error(e, Operation::GetKey));
     }
 
     info!("Retrieving key: {}", key);
@@ -92,10 +115,10 @@ pub async fn get_key(
             warn!("Key not found: {}", key);
             Err(handle_storage_error(
                 StorageError::KeyNotFound(key.clone()),
-                "get_key",
+                Operation::GetKey,
             ))
         }
-        Err(e) => Err(handle_storage_error(e, "get_key")),
+        Err(e) => Err(handle_storage_error(e, Operation::GetKey)),
     }
 }
 
@@ -107,11 +130,11 @@ pub async fn put_key(
     Json(request): Json<PutKeyRequest>,
 ) -> HandlerResult<StatusCode> {
     if let Err(e) = validate_key(&key) {
-        return Err(handle_storage_error(e, "put_key"));
+        return Err(handle_storage_error(e, Operation::PutKey));
     }
 
     if let Err(e) = validate_value(&request.value) {
-        return Err(handle_storage_error(e, "put_key"));
+        return Err(handle_storage_error(e, Operation::PutKey));
     }
 
     let value_size = request.value.len();
@@ -127,7 +150,7 @@ pub async fn put_key(
                 Ok(StatusCode::OK)
             }
         }
-        Err(e) => Err(handle_storage_error(e, "put_key")),
+        Err(e) => Err(handle_storage_error(e, Operation::PutKey)),
     }
 }
 
@@ -138,7 +161,7 @@ pub async fn delete_key(
     State(storage): State<Arc<dyn StorageEngine>>,
 ) -> HandlerResult<StatusCode> {
     if let Err(e) = validate_key(&key) {
-        return Err(handle_storage_error(e, "delete_key"));
+        return Err(handle_storage_error(e, Operation::DeleteKey));
     }
 
     info!("Deleting key: {}", key);
@@ -153,7 +176,7 @@ pub async fn delete_key(
                 Ok(StatusCode::NOT_FOUND)
             }
         }
-        Err(e) => Err(handle_storage_error(e, "delete_key")),
+        Err(e) => Err(handle_storage_error(e, Operation::DeleteKey)),
     }
 }
 
@@ -172,6 +195,6 @@ pub async fn list_keys(
                 keys,
             }))
         }
-        Err(e) => Err(handle_storage_error(e, "list_keys")),
+        Err(e) => Err(handle_storage_error(e, Operation::ListKeys)),
     }
 }
