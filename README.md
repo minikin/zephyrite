@@ -6,20 +6,20 @@ Zephyrite is a modern key-value database designed for speed, reliability, and sc
 It combines the performance of in-memory operations with the durability of persistent storage.
 
 - [Zephyrite](#zephyrite)
-  - [✨ Planned Features](#-planned-features)
+  - [✨ Current Features](#-current-features)
   - [🚀 Quick Start](#-quick-start)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
-    - [Current Status](#current-status)
-    - [Coming Soon](#coming-soon)
+    - [Running the Server](#running-the-server)
+    - [API Usage Examples](#api-usage-examples)
   - [🛠️ Development](#️-development)
     - [Commands](#commands)
-    - [API Endpoints (Planned)](#api-endpoints-planned)
-    - [Request/Response Format (Planned)](#requestresponse-format-planned)
+    - [API Endpoints](#api-endpoints)
+    - [Request/Response Format](#requestresponse-format)
   - [🧪 Testing](#-testing)
   - [🔧 Configuration](#-configuration)
   - [🗺️ Development Roadmap](#️-development-roadmap)
-    - [Phase 1: Foundation 🚧 **In Progress**](#phase-1-foundation--in-progress)
+    - [Phase 1: Foundation ✅ **Complete**](#phase-1-foundation--complete)
     - [Phase 2: Persistence (Planned)](#phase-2-persistence-planned)
     - [Phase 3: Distribution (Planned)](#phase-3-distribution-planned)
     - [Phase 4: Advanced Features (Planned)](#phase-4-advanced-features-planned)
@@ -28,13 +28,14 @@ It combines the performance of in-memory operations with the durability of persi
   - [📄 License](#-license)
   - [🙋 Support](#-support)
 
-## ✨ Planned Features
+## ✨ Current Features
 
-- **Fast In-Memory Storage**: High-performance key-value operations
-- **HTTP REST API**: Simple, clean interface for all operations
-- **Write-Ahead Log**: Persistence and crash recovery
-- **Distributed Clustering**: Multi-node data distribution
-- **Consensus Protocol**: Strong consistency guarantees
+- **Fast In-Memory Storage**: High-performance key-value operations with metadata tracking
+- **HTTP REST API**: Fully functional interface for all CRUD operations
+- **Comprehensive Validation**: Robust key and value validation with security checks
+- **Structured Logging**: Detailed tracing and observability
+- **Error Handling**: Comprehensive error responses with proper HTTP status codes
+- **Metadata Tracking**: Automatic timestamps and size tracking for stored values
 
 ## 🚀 Quick Start
 
@@ -51,34 +52,73 @@ It combines the performance of in-memory operations with the durability of persi
 git clone https://github.com/yourusername/zephyrite
 cd zephyrite
 
-# Build the project (Phase 1 in development)
+# Build the project
 just build
-
-# Note: Server functionality is currently being developed
 ```
 
-### Current Status
-
-🚧 **Phase 1 Development in Progress**
-
-We're currently building the foundation of Zephyrite step by step. The basic project structure is set up with:
-
-- ✅ Rust Edition 2024 project structure
-- ✅ Development tooling (justfile, linting)
-- ✅ : Basic HTTP server and in-memory storage
-
-### Coming Soon
-
-Once Phase 1 is complete, you'll be able to:
+### Running the Server
 
 ```bash
-# Start the server
+# Start the server (default port 8080)
 just run
 
-# Test basic operations
-curl -X PUT http://127.0.0.1:8080/keys/hello \
+# Or with custom configuration
+cargo run -- --port 3000 --log-level debug
+```
+
+### API Usage Examples
+
+Once the server is running, you can interact with it using curl:
+
+**Health Check:**
+
+```bash
+curl -X GET http://localhost:8080/health
+# Response: {"status":"ok","version":"0.1.0","service":"Zephyrite"}
+```
+
+**Store a Key-Value Pair:**
+
+```bash
+curl -X PUT http://localhost:8080/keys/user:john \
   -H "Content-Type: application/json" \
-  -d '{"value": "world"}'
+  -d '{"value": "{\"name\":\"John Doe\",\"age\":30}"}'
+# Response: 201 Created (for new keys) or 200 OK (for updates)
+```
+
+**Retrieve a Value:**
+
+```bash
+curl -X GET http://localhost:8080/keys/user:john
+# Response: {
+#   "key": "user:john",
+#   "value": "{\"name\":\"John Doe\",\"age\":30}",
+#   "found": true,
+#   "size": 28,
+#   "created_at": "2025-06-22T10:30:14.050Z",
+#   "updated_at": "2025-06-22T10:30:14.050Z"
+# }
+```
+
+**List All Keys:**
+
+```bash
+curl -X GET http://localhost:8080/keys
+# Response: {"keys":["user:john","config:app"],"count":2}
+```
+
+**Delete a Key:**
+
+```bash
+curl -X DELETE http://localhost:8080/keys/user:john
+# Response: 204 No Content (if key existed) or 404 Not Found
+```
+
+**Error Handling:**
+
+```bash
+curl -X GET http://localhost:8080/keys/nonexistent
+# Response: {"error":"key_not_found","message":"Key 'nonexistent' not found"}
 ```
 
 ## 🛠️ Development
@@ -93,21 +133,21 @@ just fmt      # Format code
 just lint     # Run linting
 ```
 
-### API Endpoints (Planned)
+### API Endpoints
 
-| Method   | Endpoint      | Description            | Status |
-| -------- | ------------- | ---------------------- | ------ |
-| `GET`    | `/`           | Health check           | Done   |
-| `PUT`    | `/keys/{key}` | Store a key-value pair | Done   |
-| `GET`    | `/keys/{key}` | Retrieve a value       | Done   |
-| `DELETE` | `/keys/{key}` | Delete a key           | Done   |
-| `GET`    | `/keys`       | List all keys          | Done   |
+| Method   | Endpoint      | Description            | Status  |
+| -------- | ------------- | ---------------------- | ------- |
+| `GET`    | `/health`     | Health check           | ✅ Done |
+| `PUT`    | `/keys/{key}` | Store a key-value pair | ✅ Done |
+| `GET`    | `/keys/{key}` | Retrieve a value       | ✅ Done |
+| `DELETE` | `/keys/{key}` | Delete a key           | ✅ Done |
+| `GET`    | `/keys`       | List all keys          | ✅ Done |
 
-### Request/Response Format (Planned)
+### Request/Response Format
 
 **Store a value:**
 
-```bash
+```http
 PUT /keys/mykey
 Content-Type: application/json
 
@@ -118,13 +158,13 @@ Content-Type: application/json
 
 **Response:**
 
-```bash
-201 Created
-```
+- `201 Created` - New key created
+- `200 OK` - Existing key updated
+- `400 Bad Request` - Invalid key or value
 
 **Retrieve a value:**
 
-```bash
+```http
 GET /keys/mykey
 ```
 
@@ -134,44 +174,99 @@ GET /keys/mykey
 {
   "key": "mykey",
   "value": "myvalue",
-  "found": true
+  "found": true,
+  "size": 7,
+  "created_at": "2025-06-22T10:30:14.050Z",
+  "updated_at": "2025-06-22T10:30:14.050Z"
 }
 ```
 
-_Note: API is currently in development as part of Phase 1_
+**List keys:**
+
+```http
+GET /keys
+```
+
+**Response:**
+
+```json
+{
+  "keys": ["key1", "key2", "key3"],
+  "count": 3
+}
+```
+
+**Delete a key:**
+
+```http
+DELETE /keys/mykey
+```
+
+**Response:**
+
+- `204 No Content` - Key successfully deleted
+- `404 Not Found` - Key does not exist
+- `400 Bad Request` - Invalid key format
+
+**Error Response Format:**
+
+```json
+{
+  "error": "error_code",
+  "message": "Human-readable error description"
+}
+```
 
 ## 🧪 Testing
 
 ```bash
-# Currently: Run project structure tests
+# Run all tests
 just test
 
-# Coming in Phase 1: Integration tests
-# just test && curl http://127.0.0.1:8080/
+# Run with coverage
+cargo test
+
+# Integration tests are included
+# Tests cover HTTP endpoints, storage operations, and error handling
 ```
+
+The test suite includes:
+
+- **Unit Tests**: Storage engine, validation, and utilities
+- **Integration Tests**: HTTP API endpoints and error scenarios
+- **Documentation Tests**: Code examples in documentation
 
 ## 🔧 Configuration
 
-Currently, Zephyrite uses simple command-line configuration:
+Zephyrite supports command-line configuration:
 
 ```bash
+# Default: port 8080, info logging
+just run
+
 # Custom port
 cargo run -- --port 9090
 
 # Debug logging
 cargo run -- --log-level debug
+
+# Both options
+cargo run -- --port 3000 --log-level trace
 ```
+
+**Available log levels:** `trace`, `debug`, `info`, `warn`, `error`
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: Foundation 🚧 **In Progress**
+### Phase 1: Foundation ✅ **Complete**
 
-- [x] Project setup
-- [x] Development tooling (justfile, linting. conventional commits, etc.)
-- [x] **Next**: Basic HTTP server
-- [ ] **Next**: In-memory key-value storage
-- [ ] **Next**: REST API (GET, PUT, DELETE, LIST)
-- [ ] **Next**: Comprehensive testing
+- [x] Project setup and tooling
+- [x] HTTP server with Axum
+- [x] In-memory key-value storage
+- [x] Complete REST API (GET, PUT, DELETE, LIST)
+- [x] Comprehensive input validation
+- [x] Error handling and logging
+- [x] Full test coverage
 
 ### Phase 2: Persistence (Planned)
 
@@ -179,23 +274,26 @@ cargo run -- --log-level debug
 - [ ] Crash recovery
 - [ ] On-disk storage
 - [ ] Configuration files
+- [ ] Backup and restore
 
 ### Phase 3: Distribution (Planned)
 
 - [ ] Node discovery
 - [ ] Data replication
 - [ ] Consistent hashing
+- [ ] Cluster management
 
 ### Phase 4: Advanced Features (Planned)
 
 - [ ] Consensus protocol (Raft)
 - [ ] Transactions
 - [ ] Performance optimizations
+- [ ] Metrics and monitoring
 
 ## 📚 Documentation
 
 - [Conventional Commits Setup](docs/CONVENTIONAL_COMMITS.md) - Detailed commit message guide
-- API Documentation (coming in Phase 1)
+- API Documentation (complete - see above)
 - Development Guide (coming soon)
 
 ## 🤝 Contributing
