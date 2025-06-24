@@ -32,6 +32,8 @@ pub mod error;
 pub mod memory;
 /// Utility functions for storage operations
 pub mod utils;
+/// Write-ahead log (WAL) implementation
+pub mod wal;
 
 pub use engine::{Stats, StorageEngine, Value, ValueMetadata};
 pub use error::{StorageError, StorageResult};
