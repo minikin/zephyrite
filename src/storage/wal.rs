@@ -418,7 +418,6 @@ mod tests {
         let temp_file = NamedTempFile::new().unwrap();
         let wal_manager = WalManager::new(temp_file.path()).unwrap();
 
-        // Log some operations
         wal_manager
             .log_operation(WalOperation::Put {
                 key: "key1".to_string(),
@@ -431,7 +430,6 @@ mod tests {
         // Verify entries exist
         assert_eq!(wal_manager.read_all_entries().unwrap().len(), 2);
 
-        // Truncate
         wal_manager.truncate().unwrap();
 
         // Verify entries are gone
