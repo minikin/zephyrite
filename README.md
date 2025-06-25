@@ -270,7 +270,7 @@ cargo run -- --port 3000 --log-level trace
 
 ### Phase 2: Persistence (Planned)
 
-- [ ] Write-Ahead Log (WAL)
+- [x] Write-Ahead Log (WAL)
 - [ ] Crash recovery
 - [ ] On-disk storage
 - [ ] Configuration files
