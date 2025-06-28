@@ -20,7 +20,7 @@ It combines the performance of in-memory operations with the durability of persi
   - [🔧 Configuration](#-configuration)
   - [🗺️ Development Roadmap](#️-development-roadmap)
     - [Phase 1: Foundation ✅ **Complete**](#phase-1-foundation--complete)
-    - [Phase 2: Persistence (Planned)](#phase-2-persistence-planned)
+    - [Phase 2: Persistence (WIP)](#phase-2-persistence-wip)
     - [Phase 3: Distribution (Planned)](#phase-3-distribution-planned)
     - [Phase 4: Advanced Features (Planned)](#phase-4-advanced-features-planned)
   - [📚 Documentation](#-documentation)
@@ -268,7 +268,7 @@ cargo run -- --port 3000 --log-level trace
 - [x] Error handling and logging
 - [x] Full test coverage
 
-### Phase 2: Persistence (Planned)
+### Phase 2: Persistence (WIP)
 
 - [x] Write-Ahead Log (WAL)
 - [ ] Crash recovery
