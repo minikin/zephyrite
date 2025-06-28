@@ -30,6 +30,8 @@ pub mod engine;
 pub mod error;
 /// In-memory storage implementation
 pub mod memory;
+/// Persistent storage implementation
+pub mod persistent;
 /// Utility functions for storage operations
 pub mod utils;
 /// Write-ahead log (WAL) implementation
