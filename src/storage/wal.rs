@@ -1,7 +1,9 @@
 use super::error::{StorageError, StorageResult};
 use crate::utils::time;
 use serde::{Deserialize, Serialize};
+use std::collections::hash_map::DefaultHasher;
 use std::fs::{File, OpenOptions};
+use std::hash::{Hash, Hasher};
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -60,9 +62,6 @@ impl WalEntry {
 
     /// Calculate a simple checksum for the entry
     fn calculate_checksum(&self) -> String {
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
-
         let mut hasher = DefaultHasher::new();
         self.sequence_number.hash(&mut hasher);
         self.operation.hash(&mut hasher);
