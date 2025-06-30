@@ -12,7 +12,7 @@ pub enum StorageError {
     KeyAlreadyExists(String),
 
     /// Invalid key format or content
-    #[error("Invalid key: {0})")]
+    #[error("Invalid key: {0}")]
     InvalidKey(String),
 
     /// Invalid value format or content
