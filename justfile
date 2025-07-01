@@ -8,7 +8,7 @@ run:
 
 # Run tests
 test:
-    cargo test
+    cargo test --all
 
 # Format code
 fmt:
