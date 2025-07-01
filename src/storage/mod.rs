@@ -40,6 +40,7 @@ pub mod wal;
 pub use engine::{Stats, StorageEngine, Value, ValueMetadata};
 pub use error::{StorageError, StorageResult};
 pub use memory::MemoryStorage;
+pub use persistent::PersistentStorage;
 
 /// Create a new default storage engine
 ///
@@ -57,6 +58,42 @@ pub fn storage() -> Box<dyn StorageEngine> {
 #[must_use]
 pub fn storage_with_capacity(capacity: usize) -> Box<dyn StorageEngine> {
     Box::new(MemoryStorage::with_capacity(capacity))
+}
+
+/// Create a new persistent storage engine with default WAL file path
+///
+/// Uses "zephyrite.wal" as the default WAL file path.
+///
+/// # Errors
+/// Returns an error if the WAL file cannot be created or accessed.
+pub fn persistent_storage() -> StorageResult<Box<dyn StorageEngine>> {
+    Ok(Box::new(PersistentStorage::new("zephyrite.wal")?))
+}
+
+/// Create a new persistent storage engine with custom WAL file path
+///
+/// # Errors
+/// Returns an error if the WAL file cannot be created or accessed.
+pub fn persistent_storage_with_wal(
+    wal_file_path: impl AsRef<std::path::Path>,
+) -> StorageResult<Box<dyn StorageEngine>> {
+    Ok(Box::new(PersistentStorage::new(wal_file_path)?))
+}
+
+/// Create a new persistent storage engine with custom options
+///
+/// # Errors
+/// Returns an error if the WAL file cannot be created or accessed.
+pub fn persistent_storage_with_options(
+    wal_file_path: impl AsRef<std::path::Path>,
+    memory_capacity: usize,
+    use_checksums: bool,
+) -> StorageResult<Box<dyn StorageEngine>> {
+    Ok(Box::new(PersistentStorage::new_with_options(
+        wal_file_path,
+        memory_capacity,
+        use_checksums,
+    )?))
 }
 
 #[cfg(test)]

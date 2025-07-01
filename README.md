@@ -31,11 +31,14 @@ It combines the performance of in-memory operations with the durability of persi
 ## ✨ Current Features
 
 - **Fast In-Memory Storage**: High-performance key-value operations with metadata tracking
+- **Persistent Storage with WAL**: Write-Ahead Logging ensures durability and crash recovery
+- **Crash Recovery**: Automatic restoration of data from WAL on server restart
 - **HTTP REST API**: Fully functional interface for all CRUD operations
 - **Comprehensive Validation**: Robust key and value validation with security checks
 - **Structured Logging**: Detailed tracing and observability
 - **Error Handling**: Comprehensive error responses with proper HTTP status codes
 - **Metadata Tracking**: Automatic timestamps and size tracking for stored values
+- **Flexible Storage Options**: Choose between in-memory or persistent storage modes
 
 ## 🚀 Quick Start
 
@@ -59,11 +62,17 @@ just build
 ### Running the Server
 
 ```bash
-# Start the server (default port 8080)
+# Start the server with in-memory storage (default port 8080)
 just run
 
-# Or with custom configuration
-cargo run -- --port 3000 --log-level debug
+# Start with persistent storage and crash recovery
+cargo run -- --persistent
+
+# Start with custom WAL file path
+cargo run -- --wal-file ./data/my-database.wal
+
+# Start with custom configuration
+cargo run -- --port 3000 --log-level debug --persistent --memory-capacity 10000
 ```
 
 ### API Usage Examples
@@ -238,10 +247,12 @@ The test suite includes:
 
 ## 🔧 Configuration
 
-Zephyrite supports command-line configuration:
+Zephyrite supports comprehensive command-line configuration:
+
+### Basic Options
 
 ```bash
-# Default: port 8080, info logging
+# Default: port 8080, in-memory storage, info logging
 just run
 
 # Custom port
@@ -250,11 +261,45 @@ cargo run -- --port 9090
 # Debug logging
 cargo run -- --log-level debug
 
-# Both options
+# Combined options
 cargo run -- --port 3000 --log-level trace
 ```
 
 **Available log levels:** `trace`, `debug`, `info`, `warn`, `error`
+
+### Persistent Storage & Crash Recovery
+
+```bash
+# Enable persistent storage with default WAL file (zephyrite.wal)
+cargo run -- --persistent
+
+# Custom WAL file location
+cargo run -- --wal-file ./data/database.wal
+
+# Set initial memory capacity (entries)
+cargo run -- --persistent --memory-capacity 50000
+
+# Disable WAL checksums (faster writes, less safe)
+cargo run -- --persistent --no-checksums
+
+# Full configuration example
+cargo run -- \
+  --port 8080 \
+  --log-level info \
+  --wal-file ./data/prod.wal \
+  --memory-capacity 100000
+```
+
+### Crash Recovery Behavior
+
+When using persistent storage (`--persistent` or `--wal-file`):
+
+1. **On Startup**: Zephyrite automatically reads the WAL file and replays all operations
+2. **During Operation**: All write operations (PUT, DELETE, CLEAR) are logged to WAL before execution
+3. **On Crash**: Data is preserved in the WAL and will be recovered on next startup
+4. **Checksum Verification**: WAL entries are verified for integrity (can be disabled with `--no-checksums`)
+
+The recovery process is automatic and requires no manual intervention.
 
 ## 🗺️ Development Roadmap
 
@@ -271,7 +316,7 @@ cargo run -- --port 3000 --log-level trace
 ### Phase 2: Persistence (WIP)
 
 - [x] Write-Ahead Log (WAL)
-- [ ] Crash recovery
+- [x] Crash recovery
 - [ ] On-disk storage
 - [ ] Configuration files
 - [ ] Backup and restore

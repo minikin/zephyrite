@@ -11,6 +11,6 @@ pub mod storage;
 /// Utility functions and helpers
 pub mod utils;
 
-pub use configs::Config;
+pub use configs::{Config, StorageConfig, StorageType};
 pub use server::Server;
-pub use storage::{MemoryStorage, StorageEngine, StorageError, StorageResult};
+pub use storage::{MemoryStorage, PersistentStorage, StorageEngine, StorageError, StorageResult};

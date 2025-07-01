@@ -16,7 +16,7 @@ async fn setup_test_server() -> (
     let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
     let (addr_tx, addr_rx) = tokio::sync::oneshot::channel::<std::net::SocketAddr>();
     let config = Config::new(0); // Let OS pick a free port
-    let server = Server::new(config);
+    let server = Server::new(config).expect("Failed to create server");
 
     tokio::spawn(async move {
         server

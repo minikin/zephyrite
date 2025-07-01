@@ -7,8 +7,8 @@ mod types;
 pub use types::*;
 
 use crate::{
-    Config,
-    storage::{MemoryStorage, StorageEngine},
+    Config, StorageType,
+    storage::{MemoryStorage, PersistentStorage, StorageEngine},
 };
 use axum::{
     Router,
@@ -26,10 +26,40 @@ pub struct Server {
 }
 
 impl Server {
-    /// Creates a new server instance with the given configuration and default storage.
-    #[must_use]
-    pub fn new(config: Config) -> Self {
-        Self::with_storage(config, Arc::new(MemoryStorage::new()))
+    /// Creates a new server instance with the given configuration and creates storage based on config.
+    ///
+    /// # Errors
+    /// Returns an error if persistent storage initialization fails (e.g., WAL file access issues).
+    pub fn new(config: Config) -> Result<Self> {
+        let storage: Arc<dyn StorageEngine> = match config.storage.storage_type {
+            StorageType::Memory => match config.storage.memory_capacity {
+                Some(capacity) => Arc::new(MemoryStorage::with_capacity(capacity)),
+                None => Arc::new(MemoryStorage::new()),
+            },
+            StorageType::Persistent => {
+                let wal_file_path = config.storage.wal_file_path.as_ref().ok_or_else(|| {
+                    ServerError::StartupError(
+                        "WAL file path required for persistent storage".to_string(),
+                    )
+                })?;
+
+                let persistent_storage = match config.storage.memory_capacity {
+                    Some(capacity) => PersistentStorage::new_with_options(
+                        wal_file_path,
+                        capacity,
+                        config.storage.use_checksums,
+                    )
+                    .map_err(ServerError::StorageError)?,
+                    None => {
+                        PersistentStorage::new(wal_file_path).map_err(ServerError::StorageError)?
+                    }
+                };
+
+                Arc::new(persistent_storage)
+            }
+        };
+
+        Ok(Self::with_storage(config, storage))
     }
 
     /// Creates a new server instance with the given configuration and custom storage.
