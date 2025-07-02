@@ -36,6 +36,9 @@ pub mod persistent;
 pub mod utils;
 /// Write-ahead log (WAL) implementation
 pub mod wal;
+/// Disk storage
+mod disk;
+
 
 pub use engine::{Stats, StorageEngine, Value, ValueMetadata};
 pub use error::{StorageError, StorageResult};
