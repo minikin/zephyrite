@@ -24,6 +24,8 @@
 //! assert_eq!(keys.len(), 1);
 //! ```
 
+/// Disk storage
+mod disk;
 /// Storage engine trait and core types
 pub mod engine;
 /// Error types for storage operations
@@ -36,9 +38,6 @@ pub mod persistent;
 pub mod utils;
 /// Write-ahead log (WAL) implementation
 pub mod wal;
-/// Disk storage
-mod disk;
-
 
 pub use engine::{Stats, StorageEngine, Value, ValueMetadata};
 pub use error::{StorageError, StorageResult};
