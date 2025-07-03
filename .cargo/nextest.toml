@@ -1,0 +1,116 @@
+[store]
+dir = "target/nextest"
+
+[profile.default]
+retries = 0
+fail-fast = false
+failure-output = "immediate"
+success-output = "never"
+status-level = "pass"
+
+slow-timeout = { period = "30s", terminate-after = 2 }
+leak-timeout = "100ms"
+
+[profile.default.junit]
+# JUnit XML output for CI integration
+path = "target/nextest/junit.xml"
+
+[profile.ci]
+# Profile optimized for CI environments
+retries = 2
+fail-fast = true
+failure-output = "immediate-final"
+success-output = "never"
+status-level = "retry"
+
+# More generous timeouts for CI
+slow-timeout = { period = "60s", terminate-after = 3 }
+leak-timeout = "500ms"
+
+# Test thread configuration for CI
+test-threads = "num-cpus"
+
+[profile.ci.junit]
+path = "target/nextest/ci-junit.xml"
+store-success-output = true
+store-failure-output = true
+
+[profile.local-dev]
+retries = 0
+fail-fast = false
+failure-output = "immediate"
+success-output = "immediate"
+status-level = "all"
+slow-timeout = { period = "10s", terminate-after = 1 }
+
+[profile.local-dev.junit]
+path = "target/nextest/local-junit.xml"
+
+[profile.fast]
+# Quick profile for development - runs only unit tests
+retries = 0
+fail-fast = true
+failure-output = "immediate"
+success-output = "never"
+status-level = "pass"
+slow-timeout = { period = "5s", terminate-after = 1 }
+
+[profile.integration-only]
+# Profile to run only integration tests
+retries = 1
+fail-fast = false
+failure-output = "immediate"
+success-output = "final"
+status-level = "all"
+slow-timeout = { period = "60s", terminate-after = 2 }
+test-threads = 1
+
+[profile.coverage]
+# Profile optimized for coverage collection
+retries = 0
+fail-fast = false
+failure-output = "never"
+success-output = "never"
+status-level = "pass"
+slow-timeout = { period = "120s", terminate-after = 3 }
+
+[profile.coverage.junit]
+path = "target/nextest/coverage-junit.xml"
+store-success-output = false
+store-failure-output = true
+
+[test-groups]
+# Group integration tests separately
+integration = { max-threads = 1 }
+
+# Override for specific tests that need special handling
+[[profile.default.overrides]]
+filter = "test(/http_server/)"
+test-group = "integration"
+
+[[profile.default.overrides]]
+filter = "test(setup_test_server)"
+retries = 1
+slow-timeout = { period = "45s" }
+
+[[profile.default.overrides]]
+filter = "test(persistent_storage)"
+slow-timeout = { period = "20s" }
+
+[[profile.default.overrides]]
+filter = "package(zephyrite) and test(/storage/)"
+slow-timeout = { period = "15s" }
+
+# Additional overrides for specific test patterns
+[[profile.default.overrides]]
+filter = "test(wal_)"
+slow-timeout = { period = "25s" }
+
+[[profile.default.overrides]]
+filter = "test(compaction)"
+slow-timeout = { period = "30s" }
+
+[[profile.ci.overrides]]
+filter = "test(/http_server/)"
+retries = 3
+slow-timeout = { period = "90s", terminate-after = 5 }

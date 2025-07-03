@@ -63,7 +63,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap_or_else(|| PathBuf::from("zephyrite.wal"));
         info!("💾 Using persistent storage with WAL file: {:?}", wal_path);
 
-        let mut config = StorageConfig::persistent(wal_path).with_checksums(!cli.no_checksums);
+        let mut config = StorageConfig::persistent(wal_path.to_string_lossy().to_string())
+            .with_checksums(!cli.no_checksums);
 
         if let Some(capacity) = cli.memory_capacity {
             config = config.with_memory_capacity(capacity);
@@ -87,7 +88,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         config
     };
 
-    let config = Config::new_with_storage(cli.port, storage_config);
+    let config = Config::with_storage(cli.port, storage_config);
     let server = Server::new(config)?;
 
     server.start().await?;

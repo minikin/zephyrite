@@ -104,12 +104,93 @@
             ]
         },
         {
+            "label": "cargo nextest run",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "nextest",
+                "run",
+                "--config-file",
+                ".cargo/nextest.toml"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "cargo nextest run (fast)",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "nextest",
+                "run",
+                "--config-file",
+                ".cargo/nextest.toml",
+                "--profile",
+                "fast"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "cargo nextest run (integration-only)",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "nextest",
+                "run",
+                "--config-file",
+                ".cargo/nextest.toml",
+                "--profile",
+                "integration-only"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "cargo nextest run (local-dev)",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "nextest",
+                "run",
+                "--config-file",
+                ".cargo/nextest.toml",
+                "--profile",
+                "local-dev"
+            ],
+            "group": "test",
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
+            "label": "cargo nextest watch",
+            "type": "shell",
+            "command": "cargo",
+            "args": [
+                "watch",
+                "-x",
+                "nextest run --config-file .cargo/nextest.toml --profile local-dev"
+            ],
+            "group": "test",
+            "isBackground": true,
+            "problemMatcher": [
+                "$rustc"
+            ]
+        },
+        {
             "label": "dev workflow",
             "dependsOrder": "sequence",
             "dependsOn": [
                 "cargo fmt",
                 "cargo clippy",
-                "cargo test"
+                "cargo nextest run (fast)"
             ],
             "group": {
                 "kind": "build",
