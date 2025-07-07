@@ -2,6 +2,33 @@
 
 This document describes the cargo-nextest setup for the Zephyrite project.
 
+- [Nextest Setup for Zephyrite](#nextest-setup-for-zephyrite)
+  - [Overview](#overview)
+  - [Configuration](#configuration)
+    - [Profiles](#profiles)
+      - [`default`](#default)
+      - [`fast`](#fast)
+      - [`integration-only`](#integration-only)
+      - [`local-dev`](#local-dev)
+      - [`ci`](#ci)
+      - [`coverage`](#coverage)
+  - [Usage](#usage)
+    - [Running Tests](#running-tests)
+    - [VS Code Tasks](#vs-code-tasks)
+    - [Test Groups](#test-groups)
+    - [Test Overrides](#test-overrides)
+  - [CI Integration](#ci-integration)
+  - [JUnit Output](#junit-output)
+  - [Filtering Tests](#filtering-tests)
+  - [Watch Mode](#watch-mode)
+  - [Performance Benefits](#performance-benefits)
+  - [Migration from cargo test](#migration-from-cargo-test)
+  - [Troubleshooting](#troubleshooting)
+    - [Config file not found](#config-file-not-found)
+    - [Profile not found](#profile-not-found)
+    - [Tests hanging](#tests-hanging)
+    - [Port conflicts](#port-conflicts)
+
 ## Overview
 
 [cargo-nextest](https://nexte.st/) is a next-generation test runner for Rust that provides:

@@ -17,7 +17,16 @@ It combines the performance of in-memory operations with the durability of persi
     - [API Endpoints](#api-endpoints)
     - [Request/Response Format](#requestresponse-format)
   - [🧪 Testing](#-testing)
+    - [Quick Testing](#quick-testing)
+    - [Targeted Testing](#targeted-testing)
+    - [Advanced Testing](#advanced-testing)
+    - [Nextest Profiles](#nextest-profiles)
+    - [Test Organization](#test-organization)
+    - [Test Features](#test-features)
   - [🔧 Configuration](#-configuration)
+    - [Basic Options](#basic-options)
+    - [Persistent Storage \& Crash Recovery](#persistent-storage--crash-recovery)
+    - [Crash Recovery Behavior](#crash-recovery-behavior)
   - [🗺️ Development Roadmap](#️-development-roadmap)
     - [Phase 1: Foundation ✅ **Complete**](#phase-1-foundation--complete)
     - [Phase 2: Persistence (WIP)](#phase-2-persistence-wip)
@@ -46,6 +55,7 @@ It combines the performance of in-memory operations with the durability of persi
 
 - **Rust 1.85+** (Edition 2024 support)
 - **Just** (task runner) - `cargo install just`
+- **cargo-nextest** (enhanced test runner) - `just install-nextest`
 - **Node.js** (optional) - For automated commit tools and validation
 
 ### Installation
@@ -55,8 +65,17 @@ It combines the performance of in-memory operations with the durability of persi
 git clone https://github.com/yourusername/zephyrite
 cd zephyrite
 
+# Install nextest (enhanced test runner)
+just install-nextest
+
 # Build the project
 just build
+```
+
+**Optional:** Install additional testing tools for coverage and watch mode:
+
+```bash
+just install-test-tools  # Installs nextest, cargo-llvm-cov, and cargo-watch
 ```
 
 ### Running the Server
@@ -135,11 +154,27 @@ curl -X GET http://localhost:8080/keys/nonexistent
 ### Commands
 
 ```bash
-just dev      # Format + lint + test
+# Development workflow
+just dev      # Format + lint + test (comprehensive)
 just run      # Start the server
-just test     # Run tests
+
+# Testing (powered by nextest)
+just test     # Run tests with nextest (local-dev profile)
+just test-fast # Quick test run with fail-fast behavior
+just test-all  # Run all tests including doctests
+just test-ci   # CI profile with retries and JUnit output
+
+# Code quality
 just fmt      # Format code
 just lint     # Run linting
+
+# Additional testing commands (run 'just test-help' for full list)
+just test-unit        # Unit tests only
+just test-integration # Integration tests only
+just test-storage     # Storage-specific tests
+just test-coverage    # Generate HTML coverage report
+just test-watch       # Watch mode for continuous testing
+just test-profiles    # Show available nextest profiles
 ```
 
 ### API Endpoints
@@ -228,22 +263,80 @@ DELETE /keys/mykey
 
 ## 🧪 Testing
 
+Zephyrite uses **cargo-nextest** for enhanced test execution with better performance, improved output formatting, and advanced CI/CD integration.
+
+### Quick Testing
+
 ```bash
-# Run all tests
+# Run all tests (recommended for development)
 just test
 
-# Run with coverage
-cargo test
+# Quick iteration with fail-fast behavior
+just test-fast
 
-# Integration tests are included
-# Tests cover HTTP endpoints, storage operations, and error handling
+# Run all tests including doctests
+just test-all
+
+# Get help with all testing commands
+just test-help
 ```
+
+### Targeted Testing
+
+```bash
+# Run only unit tests (excludes integration tests)
+just test-unit
+
+# Run only integration tests (HTTP API)
+just test-integration
+
+# Run storage-specific tests
+just test-storage
+```
+
+### Advanced Testing
+
+```bash
+# Generate HTML coverage report (opens in browser)
+just test-coverage
+
+# Watch mode - auto-rerun tests on file changes
+just test-watch
+
+# CI mode with retries and JUnit output
+just test-ci
+
+# Show available nextest profiles
+just test-profiles
+```
+
+### Nextest Profiles
+
+Zephyrite includes several optimized test profiles:
+
+- **local-dev**: Default profile for development with verbose output
+- **fast**: Quick profile with fail-fast behavior for rapid iteration
+- **integration-only**: Runs integration tests single-threaded to avoid port conflicts
+- **ci**: CI profile with automatic retries and JUnit XML output
+- **coverage**: Optimized for code coverage collection
+
+### Test Organization
 
 The test suite includes:
 
-- **Unit Tests**: Storage engine, validation, and utilities
-- **Integration Tests**: HTTP API endpoints and error scenarios
-- **Documentation Tests**: Code examples in documentation
+- **Unit Tests**: Storage engine, validation, utilities, and WAL operations
+- **Integration Tests**: HTTP API endpoints, error scenarios, and end-to-end workflows
+- **Documentation Tests**: Code examples in documentation and API contracts
+- **Storage Tests**: In-memory and persistent storage with crash recovery scenarios
+
+### Test Features
+
+- **Parallel Execution**: Tests run in separate processes for better isolation
+- **Smart Scheduling**: Longer tests start first to optimize total runtime
+- **Port Management**: Integration tests run single-threaded to prevent conflicts
+- **Automatic Retries**: Flaky tests are automatically retried in CI mode
+- **JUnit Output**: XML reports for CI/CD integration
+- **Coverage Reports**: HTML coverage reports with detailed metrics
 
 ## 🔧 Configuration
 
@@ -337,6 +430,8 @@ The recovery process is automatic and requires no manual intervention.
 
 ## 📚 Documentation
 
+- [Nextest Setup](docs/NEXTEST_SETUP.md) - Comprehensive testing setup and configuration
+- [Key Validation Rules](docs/KEY_VALIDATION_RULES.md) - Detailed key validation specifications
 - [Conventional Commits Setup](docs/CONVENTIONAL_COMMITS.md) - Detailed commit message guide
 - API Documentation (complete - see above)
 - Development Guide (coming soon)
@@ -345,13 +440,15 @@ The recovery process is automatic and requires no manual intervention.
 
 We welcome contributions! Please see our development setup:
 
-1. **Install prerequisites**: Rust 1.85+, Just
-2. **Optional**: Install Node.js for enhanced commit tools
+1. **Install prerequisites**: Rust 1.85+, Just, and nextest (`just install-nextest`)
+2. **Optional**: Install Node.js for enhanced commit tools and additional testing tools (`just install-test-tools`)
 3. **Clone and build**: `git clone ... && just build`
 4. **Setup conventional commits**: `just setup-git`
-5. **Run tests**: `just test`
-6. **Follow our workflow**: `just dev` before committing
+5. **Run tests**: `just test` (or `just test-fast` for quick iteration)
+6. **Follow our workflow**: `just dev` before committing (runs format + lint + comprehensive tests)
 7. **Use conventional commits**: See `just commit-examples` for format
+
+**Testing workflow**: Use `just test-help` to see all available testing commands. We recommend `just test-fast` during development and `just test-all` before committing.
 
 ## 📄 License
 
