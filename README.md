@@ -396,7 +396,7 @@ The recovery process is automatic and requires no manual intervention.
 
 ## 🗺️ Development Roadmap
 
-### Phase 1: Foundation ✅ **Complete**
+### Phase 1: Foundation
 
 - [x] Project setup and tooling
 - [x] HTTP server with Axum
