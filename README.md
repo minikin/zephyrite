@@ -28,7 +28,7 @@ It combines the performance of in-memory operations with the durability of persi
     - [Persistent Storage \& Crash Recovery](#persistent-storage--crash-recovery)
     - [Crash Recovery Behavior](#crash-recovery-behavior)
   - [🗺️ Development Roadmap](#️-development-roadmap)
-    - [Phase 1: Foundation ](#phase-1-foundation--complete)
+    - [Phase 1: Foundation](#phase-1-foundation)
     - [Phase 2: Persistence (WIP)](#phase-2-persistence-wip)
     - [Phase 3: Distribution (Planned)](#phase-3-distribution-planned)
     - [Phase 4: Advanced Features (Planned)](#phase-4-advanced-features-planned)
