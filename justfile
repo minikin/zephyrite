@@ -587,6 +587,109 @@ install-test-tools:
     @echo ""
     @echo "💡 Install these with: just install-coverage-tools"
 
+# Dagger.io integration commands (Phase 1)
+
+# Setup Dagger dependencies
+dagger-setup:
+    #!/usr/bin/env bash
+    echo "🔧 Setting up Dagger.io dependencies..."
+    echo ""
+
+    # Check if Docker is running
+    if ! docker info >/dev/null 2>&1; then
+        echo "❌ Docker is not running or not installed"
+        echo "💡 Please install Docker Desktop and ensure it's running:"
+        echo "   - macOS: https://docs.docker.com/desktop/mac/install/"
+        echo "   - Linux: https://docs.docker.com/engine/install/"
+        echo "   - Windows: https://docs.docker.com/desktop/windows/install/"
+        exit 1
+    fi
+
+    # Check if Go is installed
+    if ! command -v go >/dev/null 2>&1; then
+        echo "❌ Go is not installed"
+        echo "💡 Please install Go 1.21+:"
+        echo "   - macOS: brew install go"
+        echo "   - Linux: https://golang.org/doc/install"
+        echo "   - Windows: https://golang.org/doc/install"
+        exit 1
+    fi
+
+    # Check Go version
+    go_version=$(go version | awk '{print $3}' | sed 's/go//')
+    required_version="1.21"
+    if [ "$(printf '%s\n' "$required_version" "$go_version" | sort -V | head -n1)" != "$required_version" ]; then
+        echo "❌ Go version $go_version is too old (requires $required_version+)"
+        echo "💡 Please update Go to version $required_version or higher"
+        exit 1
+    fi
+
+    # Initialize Go module if needed
+    if [ ! -f "dagger/go.mod" ]; then
+        echo "📦 Initializing Dagger Go module..."
+        cd dagger && go mod init zephyrite/dagger
+    fi
+
+    # Install dependencies
+    echo "📥 Installing Dagger dependencies..."
+    cd dagger && go mod tidy
+
+    echo ""
+    echo "✅ Dagger setup complete!"
+    echo "💡 You can now use 'just dagger-test-local' and 'just dagger-release'"
+
+# Run CI tests locally with Dagger (mirrors .github/workflows/rust.yml)
+dagger-test-local:
+    #!/usr/bin/env bash
+    echo "🧪 Running Zephyrite CI tests locally with Dagger..."
+    echo "💡 This mirrors the exact CI pipeline from GitHub Actions"
+    echo ""
+
+    # Check if Docker is running
+    if ! docker info >/dev/null 2>&1; then
+        echo "❌ Docker is not running"
+        echo "💡 Please start Docker Desktop and run 'just dagger-setup'"
+        exit 1
+    fi
+
+    # Check if dagger directory exists
+    if [ ! -d "dagger" ]; then
+        echo "❌ Dagger directory not found"
+        echo "💡 Please run 'just dagger-setup' first"
+        exit 1
+    fi
+
+    # Run the Dagger pipeline
+    cd dagger && go run main.go test-local
+
+# Build release artifacts with Dagger
+dagger-release:
+    #!/usr/bin/env bash
+    echo "🚀 Building Zephyrite release artifacts with Dagger..."
+    echo ""
+
+    # Check if Docker is running
+    if ! docker info >/dev/null 2>&1; then
+        echo "❌ Docker is not running"
+        echo "💡 Please start Docker Desktop and run 'just dagger-setup'"
+        exit 1
+    fi
+
+    # Check if dagger directory exists
+    if [ ! -d "dagger" ]; then
+        echo "❌ Dagger directory not found"
+        echo "💡 Please run 'just dagger-setup' first"
+        exit 1
+    fi
+
+    # Run the Dagger pipeline
+    cd dagger && go run main.go release
+
+    echo ""
+    echo "📦 Release artifacts:"
+    echo "   Binary: ./target/release/zephyrite"
+    echo "💡 You can now distribute or test the release binary"
+
 # Install coverage visualization tools (macOS)
 install-coverage-tools:
     #!/usr/bin/env bash
@@ -663,3 +766,8 @@ test-help:
     @echo "   just install-nextest        - Install nextest only"
     @echo "   just install-test-tools     - Install all testing tools"
     @echo "   just install-coverage-tools - Install coverage visualization tools"
+    @echo ""
+    @echo "Dagger Integration (Phase 1):"
+    @echo "   just dagger-test-local - Run CI tests locally with Dagger"
+    @echo "   just dagger-release    - Build release artifacts with Dagger"
+    @echo "   just dagger-setup      - Setup Dagger dependencies"
