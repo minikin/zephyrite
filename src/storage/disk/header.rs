@@ -3,7 +3,7 @@
 use crate::{StorageError, StorageResult};
 
 /// Page size for disk storage (4KB)
-const PAGE_SIZE: u16 = 4096;
+pub const PAGE_SIZE: u16 = 4096;
 
 /// Version of the storage format
 const FORMAT_VERSION: u16 = 1;
