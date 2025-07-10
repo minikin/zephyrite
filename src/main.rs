@@ -2,8 +2,9 @@
 //! It provides documentation for the entire crate.
 
 use clap::Parser;
+use std::path::PathBuf;
 use tracing::info;
-use zephyrite::{Config, Server};
+use zephyrite::{Config, Server, StorageConfig};
 
 #[derive(Parser, Debug)]
 #[command(name = "zephyrite")]
@@ -17,7 +18,24 @@ struct Cli {
     /// Log level for the server
     #[arg(short, long, default_value = "info")]
     log_level: Option<String>,
+
+    /// Enable persistent storage with Write-Ahead Log
+    #[arg(long)]
+    persistent: bool,
+
+    /// Path to the WAL file (implies --persistent)
+    #[arg(long, value_name = "PATH")]
+    wal_file: Option<PathBuf>,
+
+    /// Initial memory capacity for storage
+    #[arg(long, value_name = "SIZE")]
+    memory_capacity: Option<usize>,
+
+    /// Disable checksums in WAL entries (only for persistent storage)
+    #[arg(long)]
+    no_checksums: bool,
 }
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
@@ -38,8 +56,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli.log_level.as_deref().unwrap_or("info")
     );
 
-    let config = Config::new(cli.port);
-    let server = Server::new(config);
+    // Determine storage configuration
+    let storage_config = if cli.persistent || cli.wal_file.is_some() {
+        let wal_path = cli
+            .wal_file
+            .unwrap_or_else(|| PathBuf::from("zephyrite.wal"));
+        info!("💾 Using persistent storage with WAL file: {:?}", wal_path);
+
+        let mut config = StorageConfig::persistent(wal_path.to_string_lossy().to_string())
+            .with_checksums(!cli.no_checksums);
+
+        if let Some(capacity) = cli.memory_capacity {
+            config = config.with_memory_capacity(capacity);
+            info!("🧠 Memory capacity set to: {}", capacity);
+        }
+
+        if cli.no_checksums {
+            info!("⚠️  WAL checksums disabled");
+        }
+
+        config
+    } else {
+        info!("⚡ Using in-memory storage (no persistence)");
+        let mut config = StorageConfig::memory();
+
+        if let Some(capacity) = cli.memory_capacity {
+            config = config.with_memory_capacity(capacity);
+            info!("🧠 Memory capacity set to: {}", capacity);
+        }
+
+        config
+    };
+
+    let config = Config::with_storage(cli.port, storage_config);
+    let server = Server::new(config)?;
 
     server.start().await?;
 

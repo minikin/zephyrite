@@ -42,7 +42,7 @@ Git will open your editor with the commit template showing examples.
 
 ## 📝 **Commit Format**
 
-```
+```bash
 <type>[optional scope]: <description>
 
 [optional body]

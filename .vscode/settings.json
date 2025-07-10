@@ -11,7 +11,7 @@
         "clippy::pedantic"
     ],
     "rust-analyzer.check.allTargets": true,
-    "rust-analyzer.procMacro.enable": true,
+    "rust-analyzer.procMacro.enable": false,
     // Import and completion settings
     "rust-analyzer.imports.granularity.group": "module",
     "rust-analyzer.imports.prefix": "crate",

@@ -1,36 +1,71 @@
 //! HTTP server module for Zephyrite
-use crate::Config;
-use axum::{Router, response::Json, routing::get};
-use serde::{Deserialize, Serialize};
-use std::io;
-use thiserror::Error;
+
+mod handlers;
+mod types;
+
+// Re-export types for public API
+pub use types::*;
+
+use crate::{
+    Config, StorageType,
+    storage::{MemoryStorage, PersistentStorage, StorageEngine},
+};
+use axum::{
+    Router,
+    routing::{delete, get, put},
+};
+use std::sync::Arc;
 use tracing::info;
 
-/// Errors that can occur in the server
-#[derive(Debug, Error)]
-pub enum ServerError {
-    /// I/O error when binding to address
-    #[error("Failed to bind to address {0}")]
-    AddressBindError(#[from] io::Error),
+use handlers::{delete_key, get_key, health_check, list_keys, put_key};
 
-    /// Server startup error
-    #[error("Server failed to start: {0}")]
-    StartupError(String),
-}
-
-/// Result type for server operations
-pub type Result<T> = std::result::Result<T, ServerError>;
-
-/// HTTP Server
+/// HTTP Server with integrated storage
 pub struct Server {
     config: Config,
+    storage: Arc<dyn StorageEngine>,
 }
 
 impl Server {
-    /// Creates a new server instance with the given configuration.
+    /// Creates a new server instance with the given configuration and creates storage based on config.
+    ///
+    /// # Errors
+    /// Returns an error if persistent storage initialization fails (e.g., WAL file access issues).
+    pub fn new(config: Config) -> Result<Self> {
+        let storage: Arc<dyn StorageEngine> = match config.storage.storage_type {
+            StorageType::Memory => match config.storage.memory_capacity {
+                Some(capacity) => Arc::new(MemoryStorage::with_capacity(capacity)),
+                None => Arc::new(MemoryStorage::new()),
+            },
+            StorageType::Persistent => {
+                let wal_file_path = config.storage.wal_file_path.as_ref().ok_or_else(|| {
+                    ServerError::StartupError(
+                        "WAL file path required for persistent storage".to_string(),
+                    )
+                })?;
+
+                let persistent_storage = match config.storage.memory_capacity {
+                    Some(capacity) => PersistentStorage::new_with_options(
+                        wal_file_path,
+                        capacity,
+                        config.storage.use_checksums,
+                    )
+                    .map_err(ServerError::StorageError)?,
+                    None => {
+                        PersistentStorage::new(wal_file_path).map_err(ServerError::StorageError)?
+                    }
+                };
+
+                Arc::new(persistent_storage)
+            }
+        };
+
+        Ok(Self::with_storage(config, storage))
+    }
+
+    /// Creates a new server instance with the given configuration and custom storage.
     #[must_use]
-    pub fn new(config: Config) -> Self {
-        Self { config }
+    pub fn with_storage(config: Config, storage: Arc<dyn StorageEngine>) -> Self {
+        Self { config, storage }
     }
 
     /// Start the server and listen for incoming requests.
@@ -56,9 +91,7 @@ impl Server {
     where
         F: std::future::Future<Output = ()> + Send + 'static,
     {
-        let app = Router::new()
-            .route("/", get(health_check))
-            .route("/health", get(health_check));
+        let app = self.create_router();
 
         info!("🌟 Starting Zephyrite server on {}", self.config.address);
 
@@ -97,20 +130,16 @@ impl Server {
         self.start_with_shutdown::<std::future::Ready<()>>(None, None)
             .await
     }
-}
 
-/// Health check res
-#[derive(Serialize, Deserialize)]
-pub struct HealthResponse {
-    status: String,
-    version: String,
-    service: String,
-}
-
-async fn health_check() -> Json<HealthResponse> {
-    Json(HealthResponse {
-        status: "ok".to_string(),
-        version: crate::VERSION.to_string(),
-        service: "Zephyrite".to_string(),
-    })
+    /// Create the axum router with all endpoints
+    fn create_router(&self) -> Router {
+        Router::new()
+            .route("/", get(health_check))
+            .route("/health", get(health_check))
+            .route("/keys", get(list_keys))
+            .route("/keys/{key}", get(get_key))
+            .route("/keys/{key}", put(put_key))
+            .route("/keys/{key}", delete(delete_key))
+            .with_state(Arc::clone(&self.storage))
+    }
 }
