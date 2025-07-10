@@ -5,6 +5,10 @@
 Zephyrite is a modern key-value database designed for speed, reliability, and scalability.
 It combines the performance of in-memory operations with the durability of persistent storage.
 
+> Please note: This project is currently in active development and may undergo significant changes.
+> The API and features are subject to change as we refine the design and implementation.
+> Contributions are welcome!
+
 - [Zephyrite](#zephyrite)
   - [✨ Current Features](#-current-features)
   - [🚀 Quick Start](#-quick-start)
@@ -452,9 +456,11 @@ We welcome contributions! Please see our development setup:
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Zephyrite is unlicensed software at the moment, meaning it is free to use without restrictions.
+However, contributions are welcome under the [Contributing Guidelines](CONTRIBUTING.md).
+Please note that contributions may be subject to future licensing changes.
 
 ## 🙋 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/zephyrite/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/zephyrite/discussions)
+- **Issues**: [GitHub Issues](https://github.com/minikin/zephyrite/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/minikin/zephyrite/discussions)
