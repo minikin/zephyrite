@@ -24,8 +24,8 @@
 //! assert_eq!(keys.len(), 1);
 //! ```
 
-/// Disk storage
-mod disk;
+/// Disk-based storage implementation
+pub mod disk;
 /// Storage engine trait and core types
 pub mod engine;
 /// Error types for storage operations
