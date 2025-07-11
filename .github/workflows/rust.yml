@@ -67,6 +67,13 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: target/nextest/ci/target/nextest/ci-junit.xml
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

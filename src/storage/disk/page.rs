@@ -1,4 +1,4 @@
-//! Page management for disk storage
+//! Page definition
 //!
 //! Pages are the fundamental unit of storage in the disk-based engine.
 //! Each page is a fixed-size block that can store data efficiently.

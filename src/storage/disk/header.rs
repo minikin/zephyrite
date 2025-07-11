@@ -1,4 +1,7 @@
-//! Disk-based storage engine with page management
+//! Header for disk storage
+//! This module defines the file header structure for disk-based storage.
+//! It includes metadata about the database file, such as the format version, page size, and next available page ID.
+//! The header is crucial for ensuring compatibility and integrity of the database file format.
 
 use crate::{StorageError, StorageResult};
 

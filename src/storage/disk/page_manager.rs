@@ -1,3 +1,9 @@
+//! Page management for disk storage
+//! This module provides functionality for managing pages in disk-based storage.
+//! It includes page allocation, deallocation, and tracking of dirty pages.
+//! Pages are the fundamental unit of storage in the disk-based engine.
+//! Each page is a fixed-size block that can store data efficiently.
+
 /// Page management utilities
 #[derive(Debug, Default)]
 pub struct PageManager {
