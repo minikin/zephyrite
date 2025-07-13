@@ -239,7 +239,6 @@ coverage-external:
     echo "   🔹 Codecov: https://codecov.io"
     echo "   🔹 Coveralls: https://coveralls.io"
     echo "   🔹 CodeClimate: https://codeclimate.com"
-    echo "   🔹 SonarQube: https://sonarqube.org"
     echo ""
 
     echo "🚀 Upload commands:"
