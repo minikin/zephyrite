@@ -9,6 +9,8 @@ It combines the performance of in-memory operations with the durability of persi
 > The API and features are subject to change as we refine the design and implementation.
 > Contributions are welcome!
 
+[![codecov](https://codecov.io/gh/minikin/zephyrite/graph/badge.svg?token=zXXjsY2RaO)](https://codecov.io/gh/minikin/zephyrite)
+
 - [Zephyrite](#zephyrite)
   - [✨ Current Features](#-current-features)
   - [🚀 Quick Start](#-quick-start)
