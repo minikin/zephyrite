@@ -56,7 +56,7 @@ impl IndexEntry {
 /// In-memory index for fast key lookups
 ///
 /// This index maintains a mapping from keys to their storage locations.
-// TODO: Consider persisted to disk as well
+// TODO: Consider persisting to disk as well
 #[derive(Debug, Default)]
 pub struct Index {
     /// Map from key to index entry
