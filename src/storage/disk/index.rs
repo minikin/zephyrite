@@ -104,9 +104,8 @@ impl Index {
     }
 
     /// Get all keys in the index
-    #[must_use]
-    pub fn keys(&self) -> Vec<String> {
-        self.entries.keys().cloned().collect()
+    pub fn keys(&self) -> impl Iterator<Item = &String> {
+        self.entries.keys()
     }
 
     /// Get all index entries
@@ -401,10 +400,10 @@ mod tests {
         index.insert("key1".to_string(), entry1);
         index.insert("key2".to_string(), entry2);
 
-        let keys = index.keys();
+        let keys: Vec<_> = index.keys().collect();
         assert_eq!(keys.len(), 2);
-        assert!(keys.contains(&"key1".to_string()));
-        assert!(keys.contains(&"key2".to_string()));
+        assert!(keys.contains(&&"key1".to_string()));
+        assert!(keys.contains(&&"key2".to_string()));
     }
 
     #[test]
