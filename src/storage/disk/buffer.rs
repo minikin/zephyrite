@@ -36,12 +36,14 @@ impl BufferPool {
     ///
     /// This will update the access order for LRU tracking.
     pub fn get_page(&mut self, page_id: u64) -> Option<&mut Page> {
-        if self.pages.contains_key(&page_id) {
-            self.access_order.retain(|&id| id != page_id);
-            self.access_order.push(page_id);
-            return self.pages.get_mut(&page_id);
+        match self.pages.get_mut(&page_id) {
+            Some(page) => {
+                self.access_order.retain(|&id| id != page_id);
+                self.access_order.push(page_id);
+                Some(page)
+            }
+            None => None,
         }
-        None
     }
 
     /// Insert a page into the buffer pool
