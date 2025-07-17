@@ -81,7 +81,8 @@ impl Index {
     }
 
     /// Insert or update an index entry
-    pub fn insert(&mut self, key: String, entry: IndexEntry) -> Option<IndexEntry> {
+    pub fn insert(&mut self, entry: IndexEntry) -> Option<IndexEntry> {
+        let key = entry.key.clone();
         self.entries.insert(key, entry)
     }
 
@@ -104,8 +105,8 @@ impl Index {
     }
 
     /// Get all keys in the index
-    pub fn keys(&self) -> impl Iterator<Item = &String> {
-        self.entries.keys()
+    pub fn keys(&self) -> impl Iterator<Item = &str> {
+        self.entries.keys().map(String::as_str)
     }
 
     /// Get all index entries
@@ -321,11 +322,7 @@ mod tests {
         let mut index = Index::new();
         let entry = IndexEntry::new("test_key".to_string(), 1, 100, 50);
 
-        assert!(
-            index
-                .insert("test_key".to_string(), entry.clone())
-                .is_none()
-        );
+        assert!(index.insert(entry.clone()).is_none());
         assert_eq!(index.len(), 1);
         assert!(!index.is_empty());
 
@@ -342,14 +339,8 @@ mod tests {
         let entry1 = IndexEntry::new("test_key".to_string(), 1, 100, 50);
         let entry2 = IndexEntry::new("test_key".to_string(), 2, 200, 75);
 
-        assert!(
-            index
-                .insert("test_key".to_string(), entry1.clone())
-                .is_none()
-        );
-        let old_entry = index
-            .insert("test_key".to_string(), entry2.clone())
-            .unwrap();
+        assert!(index.insert(entry1.clone()).is_none());
+        let old_entry = index.insert(entry2.clone()).unwrap();
 
         assert_eq!(old_entry.page_id, 1);
         assert_eq!(index.get("test_key").unwrap().page_id, 2);
@@ -367,7 +358,7 @@ mod tests {
         let entry = IndexEntry::new("test_key".to_string(), 1, 100, 50);
 
         assert!(!index.contains_key("test_key"));
-        index.insert("test_key".to_string(), entry);
+        index.insert(entry);
         assert!(index.contains_key("test_key"));
     }
 
@@ -376,7 +367,7 @@ mod tests {
         let mut index = Index::new();
         let entry = IndexEntry::new("test_key".to_string(), 1, 100, 50);
 
-        index.insert("test_key".to_string(), entry.clone());
+        index.insert(entry.clone());
         assert!(index.contains_key("test_key"));
 
         let removed = index.remove("test_key").unwrap();
@@ -397,13 +388,13 @@ mod tests {
         let entry1 = IndexEntry::new("key1".to_string(), 1, 100, 50);
         let entry2 = IndexEntry::new("key2".to_string(), 2, 200, 75);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
+        index.insert(entry1);
+        index.insert(entry2);
 
         let keys: Vec<_> = index.keys().collect();
         assert_eq!(keys.len(), 2);
-        assert!(keys.contains(&&"key1".to_string()));
-        assert!(keys.contains(&&"key2".to_string()));
+        assert!(keys.contains(&"key1"));
+        assert!(keys.contains(&"key2"));
     }
 
     #[test]
@@ -411,7 +402,7 @@ mod tests {
         let mut index = Index::new();
         let entry = IndexEntry::new("test_key".to_string(), 1, 100, 50);
 
-        index.insert("test_key".to_string(), entry.clone());
+        index.insert(entry.clone());
 
         let entries = index.entries();
         assert_eq!(entries.len(), 1);
@@ -423,7 +414,7 @@ mod tests {
         let mut index = Index::new();
         let entry = IndexEntry::new("test_key".to_string(), 1, 100, 50);
 
-        index.insert("test_key".to_string(), entry);
+        index.insert(entry);
         assert!(!index.is_empty());
 
         index.clear();
@@ -438,9 +429,9 @@ mod tests {
         let entry2 = IndexEntry::new("key2".to_string(), 1, 200, 75);
         let entry3 = IndexEntry::new("key3".to_string(), 2, 100, 50);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
-        index.insert("key3".to_string(), entry3);
+        index.insert(entry1);
+        index.insert(entry2);
+        index.insert(entry3);
 
         let page1_entries = index.entries_on_page(1);
         assert_eq!(page1_entries.len(), 2);
@@ -460,10 +451,10 @@ mod tests {
         let entry3 = IndexEntry::new("key3".to_string(), 3, 300, 25);
         let entry4 = IndexEntry::new("key4".to_string(), 2, 100, 50);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
-        index.insert("key3".to_string(), entry3);
-        index.insert("key4".to_string(), entry4);
+        index.insert(entry1);
+        index.insert(entry2);
+        index.insert(entry3);
+        index.insert(entry4);
 
         let used_pages = index.used_pages();
         assert_eq!(used_pages, vec![1, 2, 3]);
@@ -488,7 +479,7 @@ mod tests {
     fn test_index_stats_single_entry() {
         let mut index = Index::new();
         let entry = IndexEntry::new("test".to_string(), 1, 100, 50);
-        index.insert("test".to_string(), entry);
+        index.insert(entry);
 
         let stats = index.stats();
         assert_eq!(stats.entry_count, 1);
@@ -508,9 +499,9 @@ mod tests {
         let entry2 = IndexEntry::new("key22".to_string(), 1, 200, 75);
         let entry3 = IndexEntry::new("key333".to_string(), 2, 100, 25);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key22".to_string(), entry2);
-        index.insert("key333".to_string(), entry3);
+        index.insert(entry1);
+        index.insert(entry2);
+        index.insert(entry3);
 
         let stats = index.stats();
         assert_eq!(stats.entry_count, 3);
@@ -530,9 +521,9 @@ mod tests {
         let entry2 = IndexEntry::new("key2".to_string(), 1, 200, 50);
         let entry3 = IndexEntry::new("key3".to_string(), 2, 100, 50);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
-        index.insert("key3".to_string(), entry3);
+        index.insert(entry1);
+        index.insert(entry2);
+        index.insert(entry3);
 
         let errors = index.validate();
         assert!(errors.is_empty());
@@ -544,8 +535,8 @@ mod tests {
         let entry1 = IndexEntry::new("key1".to_string(), 1, 100, 50);
         let entry2 = IndexEntry::new("key2".to_string(), 1, 120, 50);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
+        index.insert(entry1);
+        index.insert(entry2);
 
         let errors = index.validate();
         assert_eq!(errors.len(), 1);
@@ -561,9 +552,9 @@ mod tests {
         let entry2 = IndexEntry::new("key2".to_string(), 1, 120, 50);
         let entry3 = IndexEntry::new("key3".to_string(), 1, 140, 50);
 
-        index.insert("key1".to_string(), entry1);
-        index.insert("key2".to_string(), entry2);
-        index.insert("key3".to_string(), entry3);
+        index.insert(entry1);
+        index.insert(entry2);
+        index.insert(entry3);
 
         let errors = index.validate();
         assert!(errors.len() >= 2);
@@ -591,7 +582,7 @@ mod tests {
     fn test_index_stats_clone() {
         let mut index = Index::new();
         let entry = IndexEntry::new("test".to_string(), 1, 100, 50);
-        index.insert("test".to_string(), entry);
+        index.insert(entry);
 
         let stats1 = index.stats();
         let stats2 = stats1.clone();
