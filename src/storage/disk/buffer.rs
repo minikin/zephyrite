@@ -18,6 +18,7 @@ pub struct BufferPool {
     /// Maximum number of pages to cache
     capacity: usize,
     /// Access order for LRU eviction (most recent at end)
+    // TODO: Consider using a VecDeque or a dedicated LRU cache structure to achieve O(1) queue operations.
     access_order: Vec<u64>,
 }
 
@@ -68,6 +69,8 @@ impl BufferPool {
                 if let Some(evicted_page) = self.pages.remove(&lru_page_id) {
                     if evicted_page.is_dirty() {
                         // TODO: write dirty pages back to disk here
+                        // Evicting dirty pages without writing back risks data loss.
+                        // Consider implementing the disk write here or making the warning behavior explicit in the API documentation.
                         warn!("Evicting dirty page {} - changes may be lost", lru_page_id);
                     }
                 }
@@ -77,6 +80,7 @@ impl BufferPool {
         }
 
         self.pages.insert(page_id, page);
+        self.access_order.retain(|&id| id != page_id);
         self.access_order.push(page_id);
         Ok(())
     }
