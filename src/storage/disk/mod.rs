@@ -9,5 +9,7 @@ pub mod page;
 /// Page manager for handling disk-based page operations
 pub mod page_manager;
 
+pub mod buffer;
+
 pub use page::Page;
 pub use page_manager::PageManager;
