@@ -1,7 +1,5 @@
 # Zephyrite
 
-> A high-performance, distributed key-value store built in Rust
-
 Zephyrite is a modern key-value database designed for speed, reliability, and scalability.
 It combines the performance of in-memory operations with the durability of persistent storage.
 
